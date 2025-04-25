@@ -1,0 +1,24 @@
+{
+  "name": "library-website",
+  "version": "1.0.0",
+  "description": "Static frontend for a historical document library",
+  "main": "src/main.js",
+  "scripts": {
+    "start": "lite-server --baseDir=\"src\"",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "library",
+    "documents",
+    "history",
+    "arabic"
+  ],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "lite-server": "^2.6.1"
+  },
+  "dependencies": {
+    "pocketbase": "^0.26.0"
+  }
+}

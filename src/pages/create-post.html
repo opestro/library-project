@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="description" content="إنشاء منشور جديد - المكتبة التاريخية الرقمية">
+  <meta name="theme-color" content="#007AFF">
+  <title>إنشاء منشور جديد - المكتبة التاريخية الرقمية</title>
+  <link rel="stylesheet" href="../styles/global.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+  <!-- Skip to main content for accessibility -->
+  <a href="#main-content" class="sr-only">تخطي إلى المحتوى الرئيسي</a>
+
+  <!-- Navigation -->
+  <header>
+    <div class="container">
+      <nav class="nav" id="main-nav">
+        <div class="nav-logo">
+          <a href="../index.html">
+            <i class="fas fa-book-open"></i>
+            المكتبة التاريخية
+          </a>
+        </div>
+        <ul class="nav-links" id="menu">
+          <li><a href="../index.html">الرئيسية</a></li>
+          <li><a href="../index.html#ages">العصور</a></li>
+          <li><a href="../index.html#categories">التصنيفات</a></li>
+          <li><a href="../index.html#features">المميزات</a></li>
+          <li><a href="../index.html#contact">اتصل بنا</a></li>
+        </ul>
+        <div class="nav-actions">
+          <div class="user-menu">
+            <button class="btn-icon user-menu-btn" id="user-menu-btn" aria-expanded="false" aria-label="قائمة المستخدم" aria-controls="user-dropdown">
+              <i class="fas fa-user-circle"></i>
+            </button>
+            <div class="user-dropdown" id="user-dropdown">
+              <div class="user-info">
+                <i class="fas fa-user-circle"></i>
+                <span id="username">المستخدم</span>
+              </div>
+              <ul class="user-menu-links">
+                <li><a href="create-post.html"><i class="fas fa-plus-circle"></i> إنشاء منشور</a></li>
+                <li><a href="#"><i class="fas fa-cog"></i> الإعدادات</a></li>
+                <li><button id="logout-btn"><i class="fas fa-sign-out-alt"></i> تسجيل الخروج</button></li>
+              </ul>
+            </div>
+          </div>
+          <button class="btn-icon" aria-label="تغيير الوضع المظلم">
+            <i class="fas fa-moon"></i>
+          </button>
+          <button class="nav-menu-btn" aria-expanded="false" aria-label="فتح القائمة" aria-controls="menu">
+            <i class="fas fa-bars"></i>
+          </button>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main-content">
+    <section class="section">
+      <div class="container">
+        <h1 class="section-title">إنشاء <span>منشور جديد</span></h1>
+        
+        <div class="create-post-container">
+          <form id="create-post-form">
+            <div id="form-error" class="error-message" style="display: none;"></div>
+            
+            <div class="form-group">
+              <label for="post-title" class="form-label">عنوان المنشور</label>
+              <input type="text" id="post-title" name="title" class="form-control" placeholder="أدخل عنوان المنشور" required>
+            </div>
+            
+            <div class="form-group">
+              <label for="post-summary" class="form-label">ملخص المنشور</label>
+              <textarea id="post-summary" name="summary" class="form-control" rows="3" placeholder="أدخل ملخصاً قصيراً للمنشور"></textarea>
+            </div>
+            
+            <div class="form-group">
+              <label for="post-category" class="form-label">التصنيف</label>
+              <select id="post-category" name="category" class="form-control" required>
+                <option value="" disabled selected>اختر تصنيفاً</option>
+                <!-- Categories will be loaded dynamically -->
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label class="form-label">محتوى المنشور</label>
+              <div class="rich-editor">
+                <div class="rich-editor-toolbar">
+                  <button type="button" class="toolbar-btn" data-command="bold" title="غامق">
+                    <i class="fas fa-bold"></i>
+                  </button>
+                  <button type="button" class="toolbar-btn" data-command="italic" title="مائل">
+                    <i class="fas fa-italic"></i>
+                  </button>
+                  <button type="button" class="toolbar-btn" data-command="underline" title="تحته خط">
+                    <i class="fas fa-underline"></i>
+                  </button>
+                  <div class="toolbar-separator"></div>
+                  <button type="button" class="toolbar-btn" data-command="justifyRight" title="محاذاة لليمين">
+                    <i class="fas fa-align-right"></i>
+                  </button>
+                  <button type="button" class="toolbar-btn" data-command="justifyCenter" title="توسيط">
+                    <i class="fas fa-align-center"></i>
+                  </button>
+                  <button type="button" class="toolbar-btn" data-command="justifyLeft" title="محاذاة لليسار">
+                    <i class="fas fa-align-left"></i>
+                  </button>
+                  <div class="toolbar-separator"></div>
+                  <button type="button" class="toolbar-btn" data-command="insertUnorderedList" title="قائمة نقطية">
+                    <i class="fas fa-list-ul"></i>
+                  </button>
+                  <button type="button" class="toolbar-btn" data-command="insertOrderedList" title="قائمة رقمية">
+                    <i class="fas fa-list-ol"></i>
+                  </button>
+                  <div class="toolbar-separator"></div>
+                  <button type="button" class="toolbar-btn" data-command="createLink" title="رابط">
+                    <i class="fas fa-link"></i>
+                  </button>
+                  <button type="button" class="toolbar-btn" data-command="unlink" title="إزالة الرابط">
+                    <i class="fas fa-unlink"></i>
+                  </button>
+                </div>
+                <div class="rich-editor-content" id="post-content" contenteditable="true"></div>
+                <input type="hidden" name="content" id="content-input">
+              </div>
+            </div>
+            
+            <div class="form-group">
+              <label class="form-label">صورة المنشور</label>
+              <div class="file-input-container">
+                <input type="file" id="post-image" name="image" class="file-input" accept="image/jpeg,image/png,image/webp,image/gif">
+                <div class="file-input-label">
+                  <i class="fas fa-upload"></i>
+                  <span>اسحب الصورة هنا أو انقر للاختيار</span>
+                </div>
+              </div>
+              <div id="image-preview" class="image-preview" style="display: none;">
+                <img src="" alt="معاينة الصورة" id="preview-img">
+                <button type="button" class="image-preview-remove" id="remove-image">
+                  <i class="fas fa-times"></i>
+                </button>
+              </div>
+            </div>
+            
+            <div class="form-group tag-input-container">
+              <label class="form-label">الوسوم</label>
+              <div class="tag-input-wrapper">
+                <div class="tag-list" id="tag-list"></div>
+                <input type="text" id="tag-input" class="tag-input" placeholder="أضف وسوماً واضغط Enter">
+                <input type="hidden" name="tags" id="tags-input">
+              </div>
+              <p class="form-hint">أضف وسوماً مفصولة بمفتاح Enter</p>
+            </div>
+            
+            <div class="form-group">
+              <label class="checkbox-container">
+                <input type="checkbox" id="post-featured" name="featured">
+                <span class="checkmark"></span>
+                <span class="checkbox-label">منشور مميز</span>
+              </label>
+              <p class="form-hint">المنشورات المميزة تظهر في الصفحة الرئيسية</p>
+            </div>
+            
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary btn-lg">
+                <i class="fas fa-paper-plane"></i>
+                نشر المنشور
+              </button>
+              <button type="button" class="btn btn-outline" id="draft-btn">
+                <i class="fas fa-save"></i>
+                حفظ كمسودة
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-brand">
+          <h3 class="footer-heading">
+            <i class="fas fa-book-open"></i>
+            المكتبة التاريخية
+          </h3>
+          <p>المكتبة التاريخية الرقمية هي مشروع يهدف إلى توثيق وحماية الوثائق التاريخية وعرضها بشكل رقمي مع ضمان أمانها وأصالتها.</p>
+        </div>
+        
+        <div class="footer-links-wrapper">
+          <div>
+            <h3 class="footer-heading">روابط سريعة</h3>
+            <ul class="footer-links">
+              <li><a href="../index.html" class="footer-link">الرئيسية</a></li>
+              <li><a href="../index.html#ages" class="footer-link">العصور</a></li>
+              <li><a href="../index.html#categories" class="footer-link">التصنيفات</a></li>
+              <li><a href="../index.html#features" class="footer-link">المميزات</a></li>
+              <li><a href="../index.html#contact" class="footer-link">اتصل بنا</a></li>
+            </ul>
+          </div>
+          
+          <div>
+            <h3 class="footer-heading">الخدمات</h3>
+            <ul class="footer-links">
+              <li><a href="#" class="footer-link">البحث في الوثائق</a></li>
+              <li><a href="#" class="footer-link">طلب وثائق خاصة</a></li>
+              <li><a href="#" class="footer-link">البحث العلمي</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      
+      <div class="copyright">
+        <p>© ٢٠٢٣ المكتبة التاريخية الرقمية. جميع الحقوق محفوظة.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- JavaScript -->
+  <script type="module">
+    import { isAuthenticated, logout, getCurrentUser, getCategories, createPost } from '../js/pocketbase.js';
+    
+    document.addEventListener('DOMContentLoaded', async function() {
+      // Authentication check
+      if (!isAuthenticated()) {
+        window.location.href = 'login.html';
+        return;
+      }
+      
+      // Set username
+      const user = getCurrentUser();
+      if (user) {
+        document.getElementById('username').textContent = user.username;
+      }
+      
+      // Logout functionality
+      const logoutBtn = document.getElementById('logout-btn');
+      if (logoutBtn) {
+        logoutBtn.addEventListener('click', function() {
+          logout();
+          window.location.href = 'login.html';
+        });
+      }
+      
+      // User dropdown
+      const userMenuBtn = document.getElementById('user-menu-btn');
+      const userDropdown = document.getElementById('user-dropdown');
+      
+      if (userMenuBtn && userDropdown) {
+        userMenuBtn.addEventListener('click', function() {
+          userDropdown.classList.toggle('active');
+          const isExpanded = userMenuBtn.getAttribute('aria-expanded') === 'true';
+          userMenuBtn.setAttribute('aria-expanded', !isExpanded);
+        });
+        
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(e) {
+          if (!userMenuBtn.contains(e.target) && !userDropdown.contains(e.target)) {
+            userDropdown.classList.remove('active');
+            userMenuBtn.setAttribute('aria-expanded', 'false');
+          }
+        });
+      }
+      
+      // Load categories
+      try {
+        const result = await getCategories();
+        
+        if (result.success) {
+          const categories = result.data;
+          const categorySelect = document.getElementById('post-category');
+          
+          categories.forEach(category => {
+            const option = document.createElement('option');
+            option.value = category.id;
+            option.textContent = category.name;
+            categorySelect.appendChild(option);
+          });
+        }
+      } catch (error) {
+        console.error('Error loading categories:', error);
+      }
+      
+      // Rich text editor
+      const toolbar = document.querySelectorAll('.toolbar-btn');
+      const editor = document.getElementById('post-content');
+      const contentInput = document.getElementById('content-input');
+      
+      toolbar.forEach(button => {
+        button.addEventListener('click', function() {
+          const command = this.dataset.command;
+          
+          if (command === 'createLink') {
+            const url = prompt('أدخل الرابط:');
+            if (url) document.execCommand(command, false, url);
+          } else {
+            document.execCommand(command, false, null);
+          }
+          
+          // Update hidden input with content
+          contentInput.value = editor.innerHTML;
+        });
+      });
+      
+      editor.addEventListener('input', function() {
+        contentInput.value = editor.innerHTML;
+      });
+      
+      // Image upload preview
+      const imageInput = document.getElementById('post-image');
+      const imagePreview = document.getElementById('image-preview');
+      const previewImg = document.getElementById('preview-img');
+      const removeImageBtn = document.getElementById('remove-image');
+      
+      imageInput.addEventListener('change', function() {
+        if (this.files && this.files[0]) {
+          const reader = new FileReader();
+          
+          reader.onload = function(e) {
+            previewImg.src = e.target.result;
+            imagePreview.style.display = 'block';
+          };
+          
+          reader.readAsDataURL(this.files[0]);
+        }
+      });
+      
+      removeImageBtn.addEventListener('click', function() {
+        imageInput.value = '';
+        imagePreview.style.display = 'none';
+      });
+      
+      // Tags input
+      const tagInput = document.getElementById('tag-input');
+      const tagList = document.getElementById('tag-list');
+      const tagsInput = document.getElementById('tags-input');
+      const tags = [];
+      
+      function updateTags() {
+        tagsInput.value = JSON.stringify(tags);
+        
+        // Clear tag list
+        tagList.innerHTML = '';
+        
+        // Add tags to the list
+        tags.forEach((tag, index) => {
+          const tagItem = document.createElement('div');
+          tagItem.className = 'tag-item';
+          
+          const removeBtn = document.createElement('button');
+          removeBtn.className = 'tag-item-remove';
+          removeBtn.innerHTML = '<i class="fas fa-times"></i>';
+          removeBtn.type = 'button';
+          removeBtn.addEventListener('click', function() {
+            tags.splice(index, 1);
+            updateTags();
+          });
+          
+          const tagText = document.createElement('span');
+          tagText.textContent = tag;
+          
+          tagItem.appendChild(removeBtn);
+          tagItem.appendChild(tagText);
+          
+          tagList.appendChild(tagItem);
+        });
+      }
+      
+      tagInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' || e.key === ',') {
+          e.preventDefault();
+          
+          const tag = this.value.trim();
+          
+          if (tag && !tags.includes(tag)) {
+            tags.push(tag);
+            updateTags();
+            this.value = '';
+          }
+        }
+      });
+      
+      // Form submission
+      const form = document.getElementById('create-post-form');
+      const formError = document.getElementById('form-error');
+      
+      form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const title = document.getElementById('post-title').value;
+        const content = contentInput.value;
+        const summary = document.getElementById('post-summary').value;
+        const category = document.getElementById('post-category').value;
+        const image = imageInput.files[0];
+        const featured = document.getElementById('post-featured').checked;
+        
+        // Validation
+        if (!title) {
+          formError.textContent = 'الرجاء إدخال عنوان للمنشور';
+          formError.style.display = 'block';
+          return;
+        }
+        
+        if (!content) {
+          formError.textContent = 'الرجاء إدخال محتوى للمنشور';
+          formError.style.display = 'block';
+          return;
+        }
+        
+        if (!category) {
+          formError.textContent = 'الرجاء اختيار تصنيف للمنشور';
+          formError.style.display = 'block';
+          return;
+        }
+        
+        // Submit data
+        const submitBtn = form.querySelector('button[type="submit"]');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري النشر...';
+        
+        try {
+          const postData = {
+            title,
+            content,
+            summary,
+            category,
+            image,
+            tags,
+            featured
+          };
+          
+          const result = await createPost(postData);
+          
+          if (result.success) {
+            alert('تم نشر المنشور بنجاح!');
+            form.reset();
+            editor.innerHTML = '';
+            tagList.innerHTML = '';
+            imagePreview.style.display = 'none';
+            formError.style.display = 'none';
+          } else {
+            formError.textContent = result.error || 'حدث خطأ أثناء نشر المنشور';
+            formError.style.display = 'block';
+          }
+        } catch (error) {
+          formError.textContent = error.message || 'حدث خطأ أثناء نشر المنشور';
+          formError.style.display = 'block';
+        } finally {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> نشر المنشور';
+        }
+      });
+      
+      // Mobile menu functionality
+      const menuBtn = document.querySelector('.nav-menu-btn');
+      const navLinks = document.querySelector('.nav-links');
+      
+      if (menuBtn && navLinks) {
+        menuBtn.addEventListener('click', function() {
+          navLinks.classList.toggle('active');
+          const isExpanded = menuBtn.getAttribute('aria-expanded') === 'true';
+          menuBtn.setAttribute('aria-expanded', !isExpanded);
+          menuBtn.innerHTML = isExpanded ? '<i class="fas fa-bars"></i>' : '<i class="fas fa-times"></i>';
+        });
+      }
+    });
+  </script>
+</body>
+</html> 

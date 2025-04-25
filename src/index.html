@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="description" content="المكتبة التاريخية الرقمية - اكتشف واستعرض الوثائق التاريخية بطريقة تفاعلية">
+  <meta name="theme-color" content="#007AFF">
+  <title>المكتبة التاريخية الرقمية</title>
+  <link rel="stylesheet" href="styles/global.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+  <!-- Skip to main content for accessibility -->
+  <a href="#main-content" class="sr-only">تخطي إلى المحتوى الرئيسي</a>
+
+  <!-- Navigation -->
+  <header>
+    <div class="container">
+      <nav class="nav" id="main-nav">
+        <div class="nav-logo">
+          <i class="fas fa-book-open"></i>
+          المكتبة التاريخية
+        </div>
+        <ul class="nav-links" id="menu">
+          <li><a href="#" class="active" aria-current="page">الرئيسية</a></li>
+          <li><a href="#ages">العصور</a></li>
+          <li><a href="#categories">التصنيفات</a></li>
+          <li><a href="#features">المميزات</a></li>
+          <li><a href="#collections">المجموعات</a></li>
+          <li><a href="#contact">اتصل بنا</a></li>
+        </ul>
+        <div class="nav-actions">
+          <a href="pages/login.html" class="btn btn-outline btn-sm">
+            <i class="fas fa-sign-in-alt"></i>
+            تسجيل الدخول
+          </a>
+          <button class="btn-icon" aria-label="تغيير الوضع المظلم">
+            <i class="fas fa-moon"></i>
+          </button>
+          <button class="nav-menu-btn" aria-expanded="false" aria-label="فتح القائمة" aria-controls="menu">
+            <i class="fas fa-bars"></i>
+          </button>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero" aria-labelledby="hero-title">
+    <div class="container">
+      <div class="hero-content fade-in">
+        <div class="hero-text">
+          <h1 id="hero-title">المكتبة التاريخية الرقمية</h1>
+          <p class="hero-description">استكشف مجموعتنا الفريدة من الوثائق التاريخية المصنفة حسب العصور المختلفة، مع قاعدة بيانات غنية ومتنوعة من المخطوطات والمستندات النادرة</p>
+        </div>
+        
+        <div class="search-container">
+          <form class="search-form">
+            <div class="search-input-group">
+              <div class="search-icon">
+                <i class="fas fa-search"></i>
+              </div>
+              <input type="text" class="search-input" placeholder="ابحث عن وثائق تاريخية..." aria-label="ابحث عن وثائق تاريخية">
+              <button type="submit" class="search-btn">
+                <i class="fas fa-arrow-left"></i>
+              </button>
+            </div>
+            <div class="search-filters">
+              <div class="filter-group">
+                <i class="fas fa-history"></i>
+                <select class="search-filter" aria-label="اختر العصر التاريخي">
+                  <option value="" disabled selected>العصر التاريخي</option>
+                  <option value="ancient">العصر القديم</option>
+                  <option value="middle">العصر الوسيط</option>
+                  <option value="modern">العصر الحديث</option>
+                  <option value="contemporary">الفترة المعاصرة</option>
+                </select>
+              </div>
+              <div class="filter-group">
+                <i class="fas fa-file-alt"></i>
+                <select class="search-filter" aria-label="اختر نوع الوثيقة">
+                  <option value="" disabled selected>نوع الوثيقة</option>
+                  <option value="manuscript">مخطوطات</option>
+                  <option value="contract">عقود ومعاهدات</option>
+                  <option value="letter">رسائل</option>
+                  <option value="decree">مراسيم</option>
+                  <option value="map">خرائط</option>
+                </select>
+              </div>
+            </div>
+          </form>
+          <div class="search-suggestions">
+            <span class="suggestions-label">اقتراحات البحث:</span>
+            <div class="suggestions-tags">
+              <a href="#" class="suggestion-tag">المعاهدات التاريخية</a>
+              <a href="#" class="suggestion-tag">مخطوطات نادرة</a>
+              <a href="#" class="suggestion-tag">وثائق العصر العباسي</a>
+            </div>
+          </div>
+        </div>
+        
+        <div class="hero-stats">
+          <div class="stat-item">
+            <div class="stat-icon">
+              <i class="fas fa-scroll"></i>
+            </div>
+            <div class="stat-content">
+              <div class="stat-value">١٠,٠٠٠+</div>
+              <div class="stat-label">وثيقة تاريخية</div>
+            </div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-icon">
+              <i class="fas fa-book"></i>
+            </div>
+            <div class="stat-content">
+              <div class="stat-value">٥٠+</div>
+              <div class="stat-label">مجموعة نادرة</div>
+            </div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-icon">
+              <i class="fas fa-language"></i>
+            </div>
+            <div class="stat-content">
+              <div class="stat-value">٨ لغات</div>
+              <div class="stat-label">متاحة للترجمة</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="hero-shape"></div>
+  </section>
+
+  <main id="main-content">
+  <!-- Ages Section -->
+    <section id="ages" class="section" aria-labelledby="ages-title">
+    <div class="container">
+        <h2 id="ages-title" class="section-title">العصور <span>التاريخية</span></h2>
+        <div class="section-description text-center">
+          <p>استكشف مجموعتنا الفريدة من الوثائق التاريخية المصنفة حسب العصور المختلفة، مع قاعدة بيانات غنية ومتنوعة من المخطوطات والمستندات النادرة</p>
+        </div>
+        
+        <div class="grid">
+          <div class="card">
+            <div class="card-badge">
+              <span class="badge badge-primary"><i class="fas fa-history"></i> وثائق أصلية</span>
+            </div>
+            <img src="https://cdn.alweb.com/thumbs/hadaarah/article/fit710x532/%D8%AA%D8%B9%D8%B1%D9%81-%D8%B9%D9%84%D9%89-%D8%A5%D9%86%D8%B3%D8%A7%D9%86-%D8%A7%D9%84%D8%B9%D8%B5%D8%B1-%D8%A7%D9%84%D8%AD%D8%AC%D8%B1%D9%8A.jpg" alt="العصر القديم" class="card-img">
+            <div class="card-content">
+              <h3>العصر القديم</h3>
+              <p>استكشف الوثائق التاريخية من العصر القديم بمختلف أنواعها وتصنيفاتها، موثقة ومحمية بتقنيات مشفرة</p>
+              <div class="card-meta">
+                <span><i class="fas fa-file-alt"></i> ٥٠٠+ وثيقة</span>
+                <span><i class="fas fa-language"></i> ٨ لغات</span>
+              </div>
+              <div class="card-footer">
+                <a href="#" class="btn btn-primary">
+                  <i class="fas fa-search"></i>
+                  عرض الوثائق
+                </a>
+              </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-badge">
+              <span class="badge badge-primary"><i class="fas fa-history"></i> وثائق أصلية</span>
+            </div>
+            <img src="https://cdn.sotor.com/thumbs/fit630x300/43947/1566717137/%D8%AA%D8%A7%D8%B1%D9%8A%D8%AE_%D8%A7%D9%84%D8%B9%D8%B5%D8%B1_%D8%A7%D9%84%D9%88%D8%B3%D9%8A%D8%B7_%D9%81%D9%8A_%D8%A3%D9%88%D8%B1%D9%88%D8%A8%D8%A7.jpg" alt="العصر الوسيط" class="card-img">
+            <div class="card-content">
+          <h3>العصر الوسيط</h3>
+              <p>استكشف الوثائق التاريخية من العصر الوسيط بمختلف أنواعها وتصنيفاتها، مع خاصية التحليل الذكي للمحتوى</p>
+              <div class="card-meta">
+                <span><i class="fas fa-file-alt"></i> ٦٥٠+ وثيقة</span>
+                <span><i class="fas fa-language"></i> ٨ لغات</span>
+              </div>
+              <div class="card-footer">
+                <a href="#" class="btn btn-primary">
+                  <i class="fas fa-search"></i>
+                  عرض الوثائق
+                </a>
+              </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-badge">
+              <span class="badge badge-primary"><i class="fas fa-history"></i> وثائق أصلية</span>
+            </div>
+          <img src="https://images.unsplash.com/photo-1461360228754-6e81c478b882?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80" alt="العصر الحديث" class="card-img">
+            <div class="card-content">
+          <h3>العصر الحديث</h3>
+              <p>استكشف الوثائق التاريخية من العصر الحديث بمختلف أنواعها وتصنيفاتها، مع إمكانية تحليل النصوص وترجمتها آلياً</p>
+              <div class="card-meta">
+                <span><i class="fas fa-file-alt"></i> ٧٢٠+ وثيقة</span>
+                <span><i class="fas fa-language"></i> ٨ لغات</span>
+              </div>
+              <div class="card-footer">
+                <a href="#" class="btn btn-primary">
+                  <i class="fas fa-search"></i>
+                  عرض الوثائق
+                </a>
+              </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-badge">
+              <span class="badge badge-primary"><i class="fas fa-history"></i> وثائق أصلية</span>
+            </div>
+          <img src="https://images.unsplash.com/photo-1606761568499-6d2451b23c66?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80" alt="الفترة المعاصرة" class="card-img">
+            <div class="card-content">
+          <h3>الفترة المعاصرة</h3>
+              <p>استكشف الوثائق التاريخية من الفترة المعاصرة بمختلف أنواعها وتصنيفاتها، مدعومة بأحدث تقنيات التعرف البصري</p>
+              <div class="card-meta">
+                <span><i class="fas fa-file-alt"></i> ٤٢٠+ وثيقة</span>
+                <span><i class="fas fa-language"></i> ٨ لغات</span>
+              </div>
+              <div class="card-footer">
+                <a href="#" class="btn btn-primary">
+                  <i class="fas fa-search"></i>
+                  عرض الوثائق
+                </a>
+              </div>
+            </div>
+          </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Categories Section -->
+    <section id="categories" class="section" style="background-color: var(--secondary-background);" aria-labelledby="categories-title">
+    <div class="container">
+        <h2 id="categories-title" class="section-title">تصنيفات <span>الوثائق</span></h2>
+        <div class="section-description text-center">
+          <p>تصفح الوثائق حسب التصنيفات المختلفة، مع تحليل ذكي للمحتوى ومصداقية موثقة بتقنيات البلوك تشين</p>
+        </div>
+        
+        <div class="tabs-container">
+          <ul class="tabs-list" role="tablist">
+            <li class="tab-item active" role="tab" aria-selected="true" id="tab-political" aria-controls="panel-political">
+              <i class="fas fa-landmark"></i> سياسياً
+            </li>
+            <li class="tab-item" role="tab" aria-selected="false" id="tab-military" aria-controls="panel-military">
+              <i class="fas fa-shield-alt"></i> عسكرياً
+            </li>
+            <li class="tab-item" role="tab" aria-selected="false" id="tab-economic" aria-controls="panel-economic">
+              <i class="fas fa-chart-line"></i> اقتصادياً
+            </li>
+            <li class="tab-item" role="tab" aria-selected="false" id="tab-social" aria-controls="panel-social">
+              <i class="fas fa-users"></i> اجتماعياً
+            </li>
+            <li class="tab-item" role="tab" aria-selected="false" id="tab-cultural" aria-controls="panel-cultural">
+              <i class="fas fa-mosque"></i> ثقافياً ودينياً
+            </li>
+      </ul>
+      
+          <div class="tab-content" id="panel-political" role="tabpanel" aria-labelledby="tab-political">
+      <div class="grid">
+        <div class="card">
+                <div class="card-badge">
+                  <span class="badge badge-success"><i class="fas fa-certificate"></i> تم التحقق</span>
+                </div>
+          <img src="https://images.unsplash.com/photo-1523995462485-3d171b5c8fa9?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80" alt="وثيقة سياسية" class="card-img">
+                <div class="card-content">
+          <h3>معاهدة السلام</h3>
+                  <p>وثيقة تاريخية هامة تتضمن معاهدة سلام بين دولتين مع تحليل نصي ذكي وتعرف على المخطوطات</p>
+                  <div class="card-meta">
+                    <span><i class="fas fa-calendar-alt"></i> ١٨٩٩</span>
+                    <span><i class="fas fa-eye"></i> ٥٦٠٠ مشاهدة</span>
+                  </div>
+                  <div class="card-security">
+                    <div class="security-status">
+                      <i class="fas fa-certificate"></i>
+                      <span>وثيقة أصلية موثقة</span>
+                    </div>
+                  </div>
+                  <div class="card-footer">
+                    <div class="media-controls">
+                      <button class="media-control" aria-label="تشغيل الفيديو">
+                        <i class="fas fa-play"></i>
+                      </button>
+                      <button class="media-control" aria-label="الاستماع للتعليق الصوتي">
+                        <i class="fas fa-volume-up"></i>
+                      </button>
+                      <button class="media-control" aria-label="تغيير اللغة">
+                        <i class="fas fa-language"></i>
+                      </button>
+                    </div>
+                    <a href="#" class="btn btn-primary">
+                      <i class="fas fa-external-link-alt"></i>
+                      عرض التفاصيل
+                    </a>
+                  </div>
+          </div>
+        </div>
+        
+        <div class="card">
+                <div class="card-badge">
+                  <span class="badge badge-success"><i class="fas fa-certificate"></i> تم التحقق</span>
+                </div>
+                <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEh_kgJOtmKvhxgJxx6z1c8TxuwEELQxSYbZezLT9cDoINOIwJpW33PMVwTaM7fOzvvbmQCQuiHsbQJOrj7k_GhyphenhyphenYVBgj52efwOuOHtMNw4NBAgp5lNbaNWd5geLnSdROUWXkCRMW0xdipk/s1600/bo%255B1%255D.png" alt="وثيقة سياسية" class="card-img">
+                <div class="card-content">
+          <h3>مرسوم ملكي</h3>
+                  <p>وثيقة تاريخية تتضمن مرسوماً ملكياً بتعيين حاكم جديد مع ترجمة آلية دقيقة بتقنية الذكاء الاصطناعي</p>
+                  <div class="card-meta">
+                    <span><i class="fas fa-calendar-alt"></i> ١٧٩٢</span>
+                    <span><i class="fas fa-eye"></i> ٤٨٠٠ مشاهدة</span>
+                  </div>
+                  <div class="card-security">
+                    <div class="security-status">
+                      <i class="fas fa-certificate"></i>
+                      <span>وثيقة أصلية موثقة</span>
+                    </div>
+                  </div>
+                  <div class="card-footer">
+                    <div class="media-controls">
+                      <button class="media-control" aria-label="تشغيل الفيديو">
+                        <i class="fas fa-play"></i>
+                      </button>
+                      <button class="media-control" aria-label="الاستماع للتعليق الصوتي">
+                        <i class="fas fa-volume-up"></i>
+                      </button>
+                      <button class="media-control" aria-label="تغيير اللغة">
+                        <i class="fas fa-language"></i>
+                      </button>
+                    </div>
+                    <a href="#" class="btn btn-primary">
+                      <i class="fas fa-external-link-alt"></i>
+                      عرض التفاصيل
+                    </a>
+                  </div>
+          </div>
+        </div>
+        
+        <div class="card">
+                <div class="card-badge">
+                  <span class="badge badge-success"><i class="fas fa-certificate"></i> تم التحقق</span>
+                </div>
+                <img src="https://www.cdn.elitihadcom.dz/wp-content/uploads/2022/10/DJAM1-780x470.jpg" alt="وثيقة سياسية" class="card-img">
+                <div class="card-content">
+          <h3>اتفاقية تجارية</h3>
+                  <p>وثيقة تاريخية تتضمن اتفاقية تجارية بين دولتين مع تحليل للبنود والشروط باستخدام الذكاء الاصطناعي</p>
+                  <div class="card-meta">
+                    <span><i class="fas fa-calendar-alt"></i> ١٨٣٥</span>
+                    <span><i class="fas fa-eye"></i> ٣٧٠٠ مشاهدة</span>
+                  </div>
+                  <div class="card-security">
+                    <div class="security-status">
+                      <i class="fas fa-certificate"></i>
+                      <span>وثيقة أصلية موثقة</span>
+                    </div>
+                  </div>
+                  <div class="card-footer">
+                    <div class="media-controls">
+                      <button class="media-control" aria-label="تشغيل الفيديو">
+                        <i class="fas fa-play"></i>
+                      </button>
+                      <button class="media-control" aria-label="الاستماع للتعليق الصوتي">
+                        <i class="fas fa-volume-up"></i>
+                      </button>
+                      <button class="media-control" aria-label="تغيير اللغة">
+                        <i class="fas fa-language"></i>
+                      </button>
+                    </div>
+                    <a href="#" class="btn btn-primary">
+                      <i class="fas fa-external-link-alt"></i>
+                      عرض التفاصيل
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+    <section id="features" class="section" aria-labelledby="features-title">
+    <div class="container">
+        <h2 id="features-title" class="section-title">مميزات <span>المكتبة</span></h2>
+        <div class="section-description text-center">
+          <p>اكتشف المميزات الفريدة التي توفرها مكتبتنا الرقمية المدعومة بأحدث تقنيات الذكاء الاصطناعي والأمان</p>
+        </div>
+        
+        <div class="grid grid-features">
+          <div class="feature-card">
+            <div class="feature-icon">
+              <i class="fas fa-book-open"></i>
+            </div>
+            <h3>أرشيف غني</h3>
+            <p>مجموعة شاملة من الوثائق التاريخية تغطي مختلف العصور والحقب الزمنية بتفاصيل دقيقة</p>
+          </div>
+          
+          <div class="feature-card">
+            <div class="feature-icon">
+              <i class="fas fa-search-plus"></i>
+            </div>
+            <h3>استكشاف متقدم</h3>
+            <p>أدوات بحث متطورة تتيح للباحثين والمؤرخين استكشاف الوثائق بسهولة وفعالية</p>
+          </div>
+          
+          <div class="feature-card">
+            <div class="feature-icon">
+              <i class="fas fa-language"></i>
+            </div>
+            <h3>ترجمة فورية</h3>
+            <p>ترجمة آلية دقيقة للوثائق التاريخية إلى ثمان لغات مختلفة باستخدام نماذج لغوية متقدمة</p>
+          </div>
+          
+          <div class="feature-card">
+            <div class="feature-icon">
+              <i class="fas fa-desktop"></i>
+            </div>
+            <h3>تجربة تفاعلية</h3>
+            <p>واجهة مستخدم سهلة وتفاعلية تعمل على جميع الأجهزة مع دعم كامل للتصفح الصوتي</p>
+          </div>
+          
+          <div class="feature-card">
+            <div class="feature-icon">
+              <i class="fas fa-eye"></i>
+            </div>
+            <h3>تعرف بصري</h3>
+            <p>استخدام تقنيات التعرف البصري لقراءة المخطوطات القديمة وتحويلها إلى نصوص رقمية</p>
+          </div>
+          
+          <div class="feature-card">
+            <div class="feature-icon">
+              <i class="fas fa-microphone-alt"></i>
+            </div>
+            <h3>تعليق صوتي</h3>
+            <p>تعليقات صوتية عالية الجودة مُنتجة بواسطة تقنية تحويل النص إلى كلام بصوت طبيعي</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- AI Security Section -->
+    <section id="historical-archives" class="section" style="background-color: var(--secondary-background);" aria-labelledby="historical-archives-title">
+      <div class="container">
+        <h2 id="historical-archives-title" class="section-title">الأرشيف <span>التاريخي</span></h2>
+        <div class="section-description text-center">
+          <p>تعرف على كيفية جمع وتوثيق وحفظ المستندات التاريخية الهامة عبر العصور المختلفة في مكتبتنا الرقمية</p>
+        </div>
+        
+        <div class="ai-security-grid">
+          <div class="ai-security-content">
+            <div class="card security-info-card">
+              <h3>كيف نحفظ تراثنا التاريخي</h3>
+              <p>نقوم بجمع الوثائق التاريخية من مصادر موثوقة وتوثيقها وفهرستها بطرق علمية دقيقة تضمن الحفاظ على قيمتها التاريخية والثقافية.</p>
+              
+              <ul class="security-features-list">
+                <li>
+                  <div class="security-feature-icon">
+                    <i class="fas fa-book"></i>
+                  </div>
+                  <div>
+                    <h4>أرشفة منهجية</h4>
+                    <p>تصنيف الوثائق التاريخية وفق منهجية علمية تسهل الوصول إليها واستخدامها في الأبحاث</p>
+                  </div>
+                </li>
+                <li>
+                  <div class="security-feature-icon">
+                    <i class="fas fa-sync-alt"></i>
+                  </div>
+                  <div>
+                    <h4>ترميم وحفظ</h4>
+                    <p>استخدام أحدث التقنيات في ترميم وحفظ المخطوطات والوثائق القديمة من التلف</p>
+                  </div>
+                </li>
+                <li>
+                  <div class="security-feature-icon">
+                    <i class="fas fa-history"></i>
+                  </div>
+                  <div>
+                    <h4>توثيق المصادر</h4>
+                    <p>توثيق دقيق لمصادر كل وثيقة وتاريخها وسياقها التاريخي لفهم أفضل</p>
+                  </div>
+                </li>
+                <li>
+                  <div class="security-feature-icon">
+                    <i class="fas fa-globe"></i>
+                  </div>
+                  <div>
+                    <h4>إتاحة عالمية</h4>
+                    <p>إتاحة الوثائق للباحثين والمؤرخين حول العالم مع دعم متعدد اللغات</p>
+                  </div>
+                </li>
+              </ul>
+              
+              <div class="security-actions">
+                <a href="#" class="btn btn-primary">
+                  <i class="fas fa-book-open"></i>
+                  استكشف الأرشيف
+                </a>
+                <a href="#" class="btn btn-outline">
+                  <i class="fas fa-play-circle"></i>
+                  شاهد الفيديو التعريفي
+                </a>
+              </div>
+            </div>
+          </div>
+          
+          <div class="ai-security-stats">
+            <div class="data-card">
+              <div class="data-header">
+                <div class="data-icon">
+                  <i class="fas fa-scroll"></i>
+                </div>
+                <div class="badge badge-success">مجموعة نادرة</div>
+              </div>
+              <div class="data-value">١٠,٠٠٠+</div>
+              <div class="data-label">وثيقة تاريخية</div>
+            </div>
+            
+            <div class="data-card">
+              <div class="data-header">
+                <div class="data-icon">
+                  <i class="fas fa-calendar-alt"></i>
+                </div>
+                <div class="badge badge-primary">تغطية زمنية</div>
+              </div>
+              <div class="data-value">٨</div>
+              <div class="data-label">قرون من التاريخ</div>
+            </div>
+            
+            <div class="data-card">
+              <div class="data-header">
+                <div class="data-icon">
+            <i class="fas fa-language"></i>
+                </div>
+                <div class="badge badge-primary">تنوع لغوي</div>
+              </div>
+              <div class="data-value">١٢</div>
+              <div class="data-label">لغة أصلية</div>
+            </div>
+            
+            <div class="data-card">
+              <div class="data-header">
+                <div class="data-icon">
+                  <i class="fas fa-users"></i>
+                </div>
+                <div class="badge badge-warning">مجتمع معرفي</div>
+              </div>
+              <div class="data-value">٥٠٠+</div>
+              <div class="data-label">باحث ومؤرخ</div>
+            </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact Section -->
+    <section id="contact" class="section" style="background-color: var(--secondary-background);" aria-labelledby="contact-title">
+    <div class="container">
+        <h2 id="contact-title" class="section-title">اتصل <span>بنا</span></h2>
+        <div class="section-description text-center">
+          <p>نحن هنا لمساعدتك والإجابة على استفساراتك. يمكنك التواصل معنا من خلال النموذج أدناه</p>
+        </div>
+        
+        <div class="contact-container">
+          <div class="card contact-card">
+            <form id="contact-form">
+              <div class="form-group">
+            <label for="name" class="form-label">الاسم</label>
+                <input type="text" id="name" class="form-control" placeholder="أدخل اسمك" required aria-required="true">
+          </div>
+              <div class="form-group">
+            <label for="email" class="form-label">البريد الإلكتروني</label>
+                <input type="email" id="email" class="form-control" placeholder="أدخل بريدك الإلكتروني" required aria-required="true">
+              </div>
+              <div class="form-group">
+                <label for="topic" class="form-label">الموضوع</label>
+                <select id="topic" class="form-control" required aria-required="true">
+                  <option value="" selected disabled>اختر موضوعاً</option>
+                  <option value="research">البحث التاريخي</option>
+                  <option value="access">طلب وصول لمخطوطات نادرة</option>
+                  <option value="contribution">المساهمة بوثائق تاريخية</option>
+                  <option value="technical">مشكلة تقنية</option>
+                  <option value="feedback">اقتراحات وملاحظات</option>
+                  <option value="other">أخرى</option>
+                </select>
+          </div>
+              <div class="form-group">
+            <label for="message" class="form-label">الرسالة</label>
+                <textarea id="message" rows="5" class="form-control" placeholder="أدخل رسالتك" required aria-required="true"></textarea>
+              </div>
+              <div class="form-footer">
+                <div class="form-group newsletter-group">
+                  <label class="switch">
+                    <input type="checkbox" checked>
+                    <span class="switch-slider"></span>
+                    <span class="switch-label">اشترك في النشرة الإخبارية</span>
+                  </label>
+                  <p class="form-hint">سنرسل لك آخر التحديثات حول المكتبة الرقمية وأحدث الوثائق</p>
+                </div>
+                <div class="form-security">
+                  <div class="security-badge">
+                    <i class="fas fa-book-reader"></i>
+                    <span>نرحب بمساهماتكم ومقترحاتكم</span>
+                  </div>
+                </div>
+                <button type="submit" class="btn btn-primary btn-lg">
+                  <i class="fas fa-paper-plane"></i>
+                  إرسال
+                </button>
+              </div>
+            </form>
+          </div>
+          
+          <div class="contact-info">
+            <div class="card contact-info-card">
+              <h3>طرق التواصل</h3>
+              <ul class="contact-details">
+                <li>
+                  <i class="fas fa-envelope"></i>
+                  <div>
+                    <h4>البريد الإلكتروني</h4>
+                    <p>info@digitallibrary.org</p>
+                  </div>
+                </li>
+                <li>
+                  <i class="fas fa-phone-alt"></i>
+                  <div>
+                    <h4>الهاتف</h4>
+                    <p>+966 12 345 6789</p>
+                  </div>
+                </li>
+                <li>
+                  <i class="fas fa-map-marker-alt"></i>
+                  <div>
+                    <h4>العنوان</h4>
+                    <p>شارع المعرفة، حي الثقافة، الرياض، المملكة العربية السعودية</p>
+                  </div>
+                </li>
+              </ul>
+              
+              <h3>ساعات العمل</h3>
+              <ul class="working-hours">
+                <li>
+                  <span>الأحد - الخميس:</span>
+                  <span>٩:٠٠ ص - ٥:٠٠ م</span>
+                </li>
+                <li>
+                  <span>الجمعة:</span>
+                  <span>مغلق</span>
+                </li>
+                <li>
+                  <span>السبت:</span>
+                  <span>١٠:٠٠ ص - ٣:٠٠ م</span>
+                </li>
+              </ul>
+              
+              <div class="social-links">
+                <a href="#" class="social-icon" aria-label="فيسبوك">
+                  <i class="fab fa-facebook-f"></i>
+                </a>
+                <a href="#" class="social-icon" aria-label="تويتر">
+                  <i class="fab fa-twitter"></i>
+                </a>
+                <a href="#" class="social-icon" aria-label="انستغرام">
+                  <i class="fab fa-instagram"></i>
+                </a>
+                <a href="#" class="social-icon" aria-label="لينكد إن">
+                  <i class="fab fa-linkedin-in"></i>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+    </div>
+  </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-brand">
+          <h3 class="footer-heading">
+            <i class="fas fa-shield-alt"></i>
+            المكتبة التاريخية
+          </h3>
+          <p>المكتبة التاريخية الرقمية هي مشروع يهدف إلى توثيق وحماية الوثائق التاريخية وعرضها بشكل رقمي مع ضمان أمانها وأصالتها.</p>
+          <div class="security-badge footer-badge">
+            <i class="fas fa-lock"></i>
+            <span>محمي بتقنية الذكاء الاصطناعي</span>
+          </div>
+        </div>
+        
+        <div class="footer-links-wrapper">
+        <div>
+          <h3 class="footer-heading">روابط سريعة</h3>
+            <ul class="footer-links">
+              <li><a href="#" class="footer-link">الرئيسية</a></li>
+              <li><a href="#ages" class="footer-link">العصور</a></li>
+              <li><a href="#categories" class="footer-link">التصنيفات</a></li>
+              <li><a href="#features" class="footer-link">المميزات</a></li>
+              <li><a href="#collections" class="footer-link">المجموعات</a></li>
+              <li><a href="#contact" class="footer-link">اتصل بنا</a></li>
+            </ul>
+          </div>
+          
+          <div>
+            <h3 class="footer-heading">الخدمات</h3>
+            <ul class="footer-links">
+              <li><a href="#" class="footer-link">البحث في الوثائق</a></li>
+              <li><a href="#" class="footer-link">طلب وثائق خاصة</a></li>
+              <li><a href="#" class="footer-link">البحث العلمي</a></li>
+              <li><a href="#" class="footer-link">التحليل النصي</a></li>
+              <li><a href="#" class="footer-link">التحقق من الوثائق</a></li>
+              <li><a href="#" class="footer-link">الترجمة الآلية</a></li>
+          </ul>
+        </div>
+          
+        <div>
+          <h3 class="footer-heading">تواصل معنا</h3>
+            <ul class="footer-links">
+              <li class="footer-contact-item">
+                <i class="fas fa-envelope"></i>
+                <span>info@digitallibrary.org</span>
+              </li>
+              <li class="footer-contact-item">
+                <i class="fas fa-phone-alt"></i>
+                <span>+966 12 345 6789</span>
+              </li>
+              <li class="footer-contact-item">
+                <i class="fas fa-map-marker-alt"></i>
+                <span>شارع المعرفة، حي الثقافة، الرياض</span>
+              </li>
+          </ul>
+            <div class="social-icons">
+              <a href="#" class="social-icon" aria-label="فيسبوك">
+                <i class="fab fa-facebook-f"></i>
+              </a>
+              <a href="#" class="social-icon" aria-label="تويتر">
+                <i class="fab fa-twitter"></i>
+              </a>
+              <a href="#" class="social-icon" aria-label="انستغرام">
+                <i class="fab fa-instagram"></i>
+              </a>
+              <a href="#" class="social-icon" aria-label="لينكد إن">
+                <i class="fab fa-linkedin-in"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="copyright">
+        <p>© ٢٠٢٣ المكتبة التاريخية الرقمية. جميع الحقوق محفوظة.</p>
+        <div class="footer-legal-links">
+          <a href="#">سياسة الخصوصية</a>
+          <a href="#">شروط الاستخدام</a>
+          <a href="#">سياسة ملفات الارتباط</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- JavaScript -->
+  <script>
+    // Add JavaScript for responsive navigation menu
+    document.addEventListener('DOMContentLoaded', function() {
+      const menuBtn = document.querySelector('.nav-menu-btn');
+      const navLinks = document.querySelector('.nav-links');
+      
+      if (menuBtn && navLinks) {
+        menuBtn.addEventListener('click', function() {
+          navLinks.classList.toggle('active');
+          const isExpanded = menuBtn.getAttribute('aria-expanded') === 'true';
+          menuBtn.setAttribute('aria-expanded', !isExpanded);
+          menuBtn.innerHTML = isExpanded ? '<i class="fas fa-bars"></i>' : '<i class="fas fa-times"></i>';
+        });
+      }
+      
+      // Navbar scroll effect
+      const navbar = document.getElementById('main-nav');
+      window.addEventListener('scroll', function() {
+        if (window.scrollY > 50) {
+          navbar.classList.add('nav-scrolled');
+        } else {
+          navbar.classList.remove('nav-scrolled');
+        }
+      });
+      
+      // Tab functionality for categories
+      const tabItems = document.querySelectorAll('.tabs-list .tab-item');
+      tabItems.forEach(tab => {
+        tab.addEventListener('click', () => {
+          // Remove active class from all tabs
+          tabItems.forEach(item => {
+            item.classList.remove('active');
+            item.setAttribute('aria-selected', 'false');
+          });
+          
+          // Add active class to clicked tab
+          tab.classList.add('active');
+          tab.setAttribute('aria-selected', 'true');
+        });
+      });
+    });
+  </script>
+</body>
+</html>
