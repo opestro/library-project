@@ -1,95 +1,112 @@
+/**
+ * Document Detail Page
+ * 
+ * Displays detailed information about a single historical document.
+ * Uses iOS-style design and fetches real data from PocketBase.
+ */
 'use client';
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import Link from 'next/link';
-import { FaDownload, FaEye, FaCalendarAlt, FaUser, FaBookOpen, FaLanguage, FaShare, FaChevronLeft } from 'react-icons/fa';
+import Image from 'next/image';
 import { MainLayout } from '@/components/layout/MainLayout';
-import { documentsApi, documentMediaApi, historicalAgeApi, contentCategoryApi } from '@/lib/api';
-import toast from 'react-hot-toast';
+import { Card } from '@/components/ui/Card';
+import { Button } from '@/components/ui/Button';
+import { Badge } from '@/components/ui/Badge';
+import { Avatar } from '@/components/ui/Avatar';
+import { DocumentCard } from '@/components/shared/DocumentCard';
+import { FaArrowRight, FaBookmark, FaDownload, FaEye, FaShare, FaRegBookmark, FaCalendarAlt, FaUser, FaTag, FaHistory, FaFileAlt, FaSpinner } from 'react-icons/fa';
+import { DocumentsAPI, ContentCategoryAPI, HistoricalAgeAPI } from '@/lib/api';
+import { getPocketBase } from '@/lib/pocketbase';
+import { HistoricalDocument, HistoricalAge, ContentCategory } from '@/types';
 
-export default function DocumentDetailPage() {
-  // Get the document ID from the URL
-  const params = useParams();
+// Define badge variants to fix type error
+type BadgeVariant = 'default' | 'secondary' | 'outline' | 'success' | 'danger' | 'warning' | 'info';
+
+// Extended document interface with additional properties
+interface UIDocument extends HistoricalDocument {
+  // Media files related to the document
+  expand?: {
+    author?: any;
+    age?: HistoricalAge;
+    category?: ContentCategory;
+    media?: Array<{ 
+      id: string;
+      file: string;
+      file_type: string;
+      title?: string;
+      description?: string;
+    }>;
+  };
+  // Additional properties that might be returned by API but not in base type
+  page_count?: number;
+  is_premium?: boolean;
+}
+
+export default function DocumentPage() {
   const router = useRouter();
-  const id = params.id as string;
+  const params = useParams() || {};
+  const paramId = params.id;
+  const documentId = typeof paramId === 'string' ? paramId : 
+                   Array.isArray(paramId) ? paramId[0] : '';
   
   // States
-  const [document, setDocument] = useState<any>(null);
-  const [media, setMedia] = useState<any[]>([]);
-  const [age, setAge] = useState<any>(null);
-  const [category, setCategory] = useState<any>(null);
+  const [document, setDocument] = useState<UIDocument | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
-  const [activeImage, setActiveImage] = useState('');
-  
-  // Related Documents
-  const [relatedDocuments, setRelatedDocuments] = useState<any[]>([]);
+  const [relatedDocs, setRelatedDocs] = useState<UIDocument[]>([]);
+  const [isBookmarked, setIsBookmarked] = useState(false);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [categories, setCategories] = useState<ContentCategory[]>([]);
+  const [ages, setAges] = useState<HistoricalAge[]>([]);
   
   // Fetch document data
   useEffect(() => {
-    async function fetchDocument() {
-      setIsLoading(true);
-      setError('');
+    const fetchDocumentData = async () => {
+      if (!documentId) return;
       
+      setIsLoading(true);
       try {
-        // Get document details
-        const docResult = await documentsApi.getById(id);
+        // Fetch document details
+        const documentsApi = new DocumentsAPI();
+        const response = await documentsApi.getById(documentId);
         
-        if (!docResult.success || !docResult.data) {
-          setError('الوثيقة غير موجودة');
-          setIsLoading(false);
-          return;
-        }
-        
-        // Record view
-        await documentsApi.incrementViewCount(id);
-        
-        const doc = docResult.data;
-        setDocument(doc);
-        
-        // Set active image to thumbnail if available
-        if (doc.thumbnailUrl) {
-          setActiveImage(doc.thumbnailUrl);
-        }
-        
-        // Fetch media files
-        const mediaResult = await documentMediaApi.getByDocumentId(id);
-        if (mediaResult.success && mediaResult.data) {
-          setMedia(mediaResult.data);
+        if (response.success && response.data) {
+          const doc = response.data as UIDocument;
+          setDocument(doc);
           
-          // If there are media files and no thumbnail is set, use the first media file
-          if (mediaResult.data.length > 0 && !activeImage) {
-            setActiveImage(mediaResult.data[0].url);
+          // Increment view count
+          await documentsApi.incrementViewCount(documentId);
+          
+          // Fetch related documents
+          const relatedResponse = await documentsApi.getByCategory(
+            doc.category || '',
+            4
+          );
+          
+          if (relatedResponse.success && relatedResponse.data) {
+            // Filter out the current document from related docs
+            const filtered = relatedResponse.data.filter(
+              (d) => d.id !== documentId
+            );
+            setRelatedDocs(filtered as UIDocument[]);
           }
+        } else {
+          setError('لم يتم العثور على الوثيقة');
         }
         
-        // Fetch related information
-        if (doc.age) {
-          const ageResult = await historicalAgeApi.getById(doc.age);
-          if (ageResult.success && ageResult.data) {
-            setAge(ageResult.data);
-          }
+        // Fetch categories
+        const categoryApi = new ContentCategoryAPI();
+        const categoriesResponse = await categoryApi.getAll();
+        if (categoriesResponse.success && categoriesResponse.data) {
+          setCategories(categoriesResponse.data);
         }
         
-        if (doc.category) {
-          const categoryResult = await contentCategoryApi.getById(doc.category);
-          if (categoryResult.success && categoryResult.data) {
-            setCategory(categoryResult.data);
-          }
-        }
-        
-        // Fetch related documents
-        let relatedDocsResult;
-        if (doc.category) {
-          relatedDocsResult = await documentsApi.getByCategory(doc.category, 4);
-        } else if (doc.age) {
-          relatedDocsResult = await documentsApi.getByHistoricalAge(doc.age, 4);
-        }
-        
-        if (relatedDocsResult?.success && relatedDocsResult.data) {
-          // Filter out the current document
-          setRelatedDocuments(relatedDocsResult.data.filter((relDoc: any) => relDoc.id !== id));
+        // Fetch ages
+        const ageApi = new HistoricalAgeAPI();
+        const agesResponse = await ageApi.getAll();
+        if (agesResponse.success && agesResponse.data) {
+          setAges(agesResponse.data);
         }
       } catch (error) {
         console.error('Error fetching document:', error);
@@ -97,44 +114,66 @@ export default function DocumentDetailPage() {
       } finally {
         setIsLoading(false);
       }
-    }
+    };
     
-    fetchDocument();
-  }, [id, activeImage]);
+    fetchDocumentData();
+  }, [documentId]);
+  
+  // Handle bookmark toggle
+  const handleBookmarkToggle = () => {
+    setIsBookmarked(!isBookmarked);
+    // In a real app with authentication, would make an API call to update user's bookmarks
+  };
   
   // Handle document download
   const handleDownload = async () => {
     if (!document) return;
     
     try {
-      await documentsApi.incrementDownloadCount(id);
+      // Get main document file if available
+      const fileUrl = document.expand?.media?.[currentPage]?.file;
+      const mediaItem = document.expand?.media?.[currentPage];
       
-      if (document.fileUrl) {
-        window.open(document.fileUrl, '_blank');
-        toast.success('جاري تحميل الملف');
+      if (fileUrl && mediaItem) {
+        // In a real app with authentication, might need to include auth token
+        const pb = getPocketBase();
+        const fullUrl = pb.getFileUrl(mediaItem, fileUrl);
+        
+        // Create a temporary anchor and trigger download
+        const a = window.document.createElement('a');
+        a.href = fullUrl;
+        a.download = `${document.title}.pdf`;
+        window.document.body.appendChild(a);
+        a.click();
+        window.document.body.removeChild(a);
+        
+        // Increment download count
+        const documentsApi = new DocumentsAPI();
+        await documentsApi.incrementDownloadCount(documentId);
       } else {
-        toast.error('ملف التحميل غير متوفر');
+        console.error('No file available for download');
+        alert('الملف غير متوفر للتنزيل');
       }
     } catch (error) {
-      console.error('Download error:', error);
-      toast.error('حدث خطأ أثناء التحميل');
+      console.error('Error downloading document:', error);
+      alert('حدث خطأ أثناء تنزيل الوثيقة');
     }
   };
   
-  // Share document
+  // Handle sharing
   const handleShare = () => {
-    if (navigator.share) {
+    if (typeof window !== 'undefined' && navigator.share && document) {
       navigator.share({
-        title: document?.title || 'وثيقة تاريخية',
-        text: document?.description || 'مشاركة وثيقة من مكتبة الوثائق التاريخية',
+        title: document.title,
+        text: document.summary || 'وثيقة تاريخية من المكتبة الرقمية',
         url: window.location.href,
-      }).catch(err => {
-        console.error('Share error:', err);
-      });
+      }).catch((error) => console.error('Error sharing:', error));
     } else {
-      // Fallback - copy to clipboard
-      navigator.clipboard.writeText(window.location.href);
-      toast.success('تم نسخ الرابط إلى الحافظة');
+      // Fallback copy to clipboard
+      if (typeof window !== 'undefined') {
+        navigator.clipboard.writeText(window.location.href);
+        alert('تم نسخ الرابط إلى الحافظة');
+      }
     }
   };
   
@@ -142,30 +181,11 @@ export default function DocumentDetailPage() {
   if (isLoading) {
     return (
       <MainLayout>
-        <div className="container mx-auto px-4 py-12">
-          <div className="flex h-96 items-center justify-center">
-            <div className="text-center">
-              <svg
-                className="mx-auto h-12 w-12 animate-spin text-primary"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                ></circle>
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                ></path>
-              </svg>
-              <p className="mt-4 text-lg">جاري تحميل الوثيقة...</p>
+        <div className="container mx-auto px-4 py-16">
+          <div className="flex justify-center items-center">
+            <div className="flex flex-col items-center gap-4">
+              <FaSpinner className="h-12 w-12 text-[#007AFF] animate-spin" />
+              <p className="text-lg text-[#8E8E93] dark:text-gray-400">جاري تحميل بيانات الوثيقة...</p>
             </div>
           </div>
         </div>
@@ -173,274 +193,324 @@ export default function DocumentDetailPage() {
     );
   }
   
-  // Error state
-  if (error) {
+  // Error or document not found
+  if (error || !document) {
     return (
       <MainLayout>
-        <div className="container mx-auto px-4 py-12">
-          <div className="rounded-lg bg-red-50 p-6 text-center dark:bg-red-900/30">
-            <svg
-              className="mx-auto h-16 w-16 text-red-500"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-              />
-            </svg>
-            <h2 className="mt-4 text-2xl font-bold text-red-800 dark:text-red-300">{error}</h2>
-            <div className="mt-6">
-              <button
-                onClick={() => router.push('/browse')}
-                className="rounded-md bg-primary px-4 py-2 text-white hover:bg-primary-dark"
-              >
-                العودة إلى صفحة التصفح
-              </button>
+        <div className="container mx-auto px-4 py-16">
+          <div className="text-center">
+            <div className="mb-6 rounded-full bg-[#F2F2F7] dark:bg-gray-700 p-8 inline-block">
+              <FaFileAlt className="h-12 w-12 text-[#8E8E93] dark:text-gray-400" />
             </div>
+            <h1 className="mb-4 text-2xl font-bold text-[#1C1C1E] dark:text-white">
+              {error || 'لم يتم العثور على الوثيقة'}
+            </h1>
+            <p className="mb-6 text-[#8E8E93] dark:text-gray-400">
+              الوثيقة التي تبحث عنها غير موجودة أو تم حذفها
+            </p>
+            <Button
+              variant="primary"
+              size="lg"
+              leftIcon={<FaArrowRight />}
+              onClick={() => router.push('/browse')}
+            >
+              العودة إلى صفحة التصفح
+            </Button>
           </div>
         </div>
       </MainLayout>
     );
   }
+
+  // Find category and age names
+  const categoryName = categories.find(c => c.id === document.category)?.name || '';
+  const eraName = ages.find(a => a.id === document.age)?.name || '';
   
+  // Get document media
+  const documentMedia = document.expand?.media || [];
+  const hasMedia = documentMedia.length > 0;
+
   return (
     <MainLayout>
-      <div className="container mx-auto px-4 py-12">
-        {/* Back Button */}
+      <div className="container mx-auto px-4 py-8">
         <div className="mb-6">
           <button
-            onClick={() => router.back()}
-            className="flex items-center text-gray-600 hover:text-primary dark:text-gray-300 dark:hover:text-primary-light"
+            onClick={() => router.push('/browse')}
+            className="mb-4 inline-flex items-center gap-2 text-sm text-[#007AFF] dark:text-blue-400"
           >
-            <FaChevronLeft className="ml-1" />
-            العودة
+            <FaArrowRight className="h-3 w-3" />
+            <span>العودة إلى صفحة التصفح</span>
           </button>
-        </div>
-        
-        <div className="grid gap-8 md:grid-cols-3">
-          {/* Document Images */}
-          <div className="md:col-span-1">
-            <div className="overflow-hidden rounded-lg bg-white shadow-md dark:bg-gray-800">
-              <div className="relative aspect-square">
-                {activeImage ? (
-                  <img
-                    src={activeImage}
-                    alt={document?.title}
-                    className="h-full w-full object-contain p-4"
-                  />
+          
+          <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
+            {/* Document image */}
+            <div className="lg:col-span-5">
+              <div className="relative rounded-xl overflow-hidden shadow-lg aspect-[3/4] bg-[#F2F2F7] dark:bg-gray-700">
+                {hasMedia && documentMedia[currentPage] ? (
+                  <div className="relative h-full w-full">
+                    <Image
+                      src={getPocketBase().getFileUrl(documentMedia[currentPage], documentMedia[currentPage].file)}
+                      alt={documentMedia[currentPage].title || `صفحة ${currentPage + 1} من ${document.title}`}
+                      className="object-contain"
+                      fill
+                    />
+                  </div>
                 ) : (
-                  <div className="flex h-full w-full items-center justify-center bg-gray-100 dark:bg-gray-700">
-                    <span className="text-center text-lg text-gray-500 dark:text-gray-400">
-                      لا توجد صورة
-                    </span>
+                  <div className="flex h-full items-center justify-center">
+                    <div className="text-center">
+                      <FaFileAlt className="mx-auto h-16 w-16 text-[#8E8E93] dark:text-gray-400" />
+                      <p className="mt-4 text-[#8E8E93] dark:text-gray-400">لا توجد صورة متوفرة</p>
+                    </div>
                   </div>
                 )}
               </div>
               
-              {/* Thumbnail Gallery */}
-              {media.length > 0 && (
-                <div className="flex gap-2 overflow-x-auto p-4">
-                  {media.map((item, index) => (
-                    <button
-                      key={index}
-                      onClick={() => setActiveImage(item.url)}
-                      className={`h-16 w-16 flex-shrink-0 overflow-hidden rounded border-2 ${
-                        activeImage === item.url
-                          ? 'border-primary'
-                          : 'border-transparent'
-                      }`}
-                    >
-                      <img
-                        src={item.url}
-                        alt={`صورة ${index + 1}`}
-                        className="h-full w-full object-cover"
-                      />
-                    </button>
-                  ))}
+              {/* Page navigation */}
+              {hasMedia && documentMedia.length > 1 && (
+                <div className="mt-4">
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm text-[#8E8E93] dark:text-gray-400">
+                      الصفحة {currentPage + 1} من {documentMedia.length}
+                    </p>
+                    
+                    <div className="flex gap-2">
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={() => setCurrentPage(p => Math.max(0, p - 1))}
+                        disabled={currentPage === 0}
+                      >
+                        السابق
+                      </Button>
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={() => setCurrentPage(p => Math.min(documentMedia.length - 1, p + 1))}
+                        disabled={currentPage === documentMedia.length - 1}
+                      >
+                        التالي
+                      </Button>
+                    </div>
+                  </div>
                   
-                  {document?.thumbnailUrl && (
+                  {/* Thumbnails */}
+                  <div className="mt-4 flex gap-2 overflow-x-auto pb-2">
+                    {documentMedia.map((page, index) => (
+                      <button
+                        key={page.id}
+                        onClick={() => setCurrentPage(index)}
+                        className={`relative min-w-[60px] aspect-[3/4] rounded-md overflow-hidden border-2 transition-all ${
+                          currentPage === index
+                            ? 'border-[#007AFF]'
+                            : 'border-transparent hover:border-[#007AFF]/50'
+                        }`}
+                      >
+                        <Image
+                          src={getPocketBase().getFileUrl(page, page.file, {'thumb': '100x100'})}
+                          alt={`صفحة ${index + 1}`}
+                          className="object-cover"
+                          fill
+                        />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+            
+            {/* Document info */}
+            <div className="lg:col-span-7">
+              <div className="space-y-6">
+                <div>
+                  <div className="flex items-start justify-between">
+                    <h1 className="text-2xl md:text-3xl font-bold text-[#1C1C1E] dark:text-white">
+                      {document.title}
+                    </h1>
+                    
                     <button
-                      onClick={() => setActiveImage(document.thumbnailUrl)}
-                      className={`h-16 w-16 flex-shrink-0 overflow-hidden rounded border-2 ${
-                        activeImage === document.thumbnailUrl
-                          ? 'border-primary'
-                          : 'border-transparent'
+                      onClick={handleBookmarkToggle}
+                      className={`p-2 rounded-full ${
+                        isBookmarked
+                          ? 'text-[#FF9500] hover:text-[#FF8000]'
+                          : 'text-[#8E8E93] hover:text-[#007AFF]'
                       }`}
+                      aria-label={isBookmarked ? 'إزالة من المحفوظات' : 'إضافة إلى المحفوظات'}
                     >
-                      <img
-                        src={document.thumbnailUrl}
-                        alt="صورة مصغرة"
-                        className="h-full w-full object-cover"
-                      />
+                      {isBookmarked ? (
+                        <FaBookmark className="h-5 w-5" />
+                      ) : (
+                        <FaRegBookmark className="h-5 w-5" />
+                      )}
                     </button>
-                  )}
-                </div>
-              )}
-              
-              {/* Action Buttons */}
-              <div className="flex border-t border-gray-200 p-4 dark:border-gray-700">
-                {document?.fileUrl && (
-                  <button
-                    onClick={handleDownload}
-                    className="flex flex-1 items-center justify-center gap-2 rounded-md bg-primary px-4 py-2 text-white hover:bg-primary-dark"
-                  >
-                    <FaDownload />
-                    <span>تحميل</span>
-                  </button>
-                )}
-                
-                <button
-                  onClick={handleShare}
-                  className="flex flex-1 items-center justify-center gap-2 rounded-md bg-gray-100 px-4 py-2 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
-                >
-                  <FaShare />
-                  <span>مشاركة</span>
-                </button>
-              </div>
-            </div>
-          </div>
-          
-          {/* Document Details */}
-          <div className="md:col-span-2">
-            <h1 className="mb-2 text-3xl font-bold text-gray-900 dark:text-white">
-              {document?.title}
-            </h1>
-            
-            <div className="mb-6 flex flex-wrap gap-4 text-sm text-gray-600 dark:text-gray-300">
-              {document?.author && (
-                <div className="flex items-center gap-1">
-                  <FaUser className="text-gray-400" />
-                  <span>المؤلف: {document.author}</span>
-                </div>
-              )}
-              
-              {document?.publishDate && (
-                <div className="flex items-center gap-1">
-                  <FaCalendarAlt className="text-gray-400" />
-                  <span>تاريخ النشر: {document.publishDate}</span>
-                </div>
-              )}
-              
-              {document?.pageCount && (
-                <div className="flex items-center gap-1">
-                  <FaBookOpen className="text-gray-400" />
-                  <span>عدد الصفحات: {document.pageCount}</span>
-                </div>
-              )}
-              
-              {document?.language && (
-                <div className="flex items-center gap-1">
-                  <FaLanguage className="text-gray-400" />
-                  <span>اللغة: {document.language}</span>
-                </div>
-              )}
-              
-              <div className="flex items-center gap-1">
-                <FaEye className="text-gray-400" />
-                <span>المشاهدات: {document?.viewCount || 0}</span>
-              </div>
-              
-              <div className="flex items-center gap-1">
-                <FaDownload className="text-gray-400" />
-                <span>التنزيلات: {document?.downloadCount || 0}</span>
-              </div>
-            </div>
-            
-            {/* Tags/Categories */}
-            <div className="mb-6 flex flex-wrap gap-2">
-              {age && (
-                <Link
-                  href={`/browse?age=${age.id}`}
-                  className="rounded-full bg-blue-100 px-3 py-1 text-sm text-blue-800 dark:bg-blue-900/30 dark:text-blue-300"
-                >
-                  {age.name}
-                </Link>
-              )}
-              
-              {category && (
-                <Link
-                  href={`/browse?category=${category.id}`}
-                  className="rounded-full bg-green-100 px-3 py-1 text-sm text-green-800 dark:bg-green-900/30 dark:text-green-300"
-                >
-                  {category.name}
-                </Link>
-              )}
-            </div>
-            
-            {/* Description */}
-            <div className="mb-8 rounded-lg bg-white p-6 shadow-md dark:bg-gray-800">
-              <h2 className="mb-4 text-xl font-semibold text-gray-900 dark:text-white">
-                وصف الوثيقة
-              </h2>
-              <div className="prose max-w-none dark:prose-invert">
-                <p className="whitespace-pre-line text-gray-700 dark:text-gray-300">
-                  {document?.description || 'لا يوجد وصف متاح لهذه الوثيقة.'}
-                </p>
-              </div>
-            </div>
-            
-            {/* Historical Context */}
-            {age && (
-              <div className="mb-8 rounded-lg bg-white p-6 shadow-md dark:bg-gray-800">
-                <h2 className="mb-4 text-xl font-semibold text-gray-900 dark:text-white">
-                  السياق التاريخي: {age.name}
-                </h2>
-                <div className="prose max-w-none dark:prose-invert">
-                  <p className="text-gray-700 dark:text-gray-300">
-                    {age.description || `معلومات عن الفترة التاريخية ${age.name}.`}
-                  </p>
-                  <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-                    الفترة: {age.periodStart || '?'} - {age.periodEnd || '?'}
-                  </p>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-        
-        {/* Related Documents */}
-        {relatedDocuments.length > 0 && (
-          <div className="mt-12">
-            <h2 className="mb-6 text-2xl font-bold text-gray-900 dark:text-white">
-              وثائق ذات صلة
-            </h2>
-            
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {relatedDocuments.map((doc) => (
-                <Link
-                  href={`/document/${doc.id}`}
-                  key={doc.id}
-                  className="group overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm transition-transform hover:-translate-y-1 hover:shadow-md dark:border-gray-700 dark:bg-gray-800"
-                >
-                  <div className="aspect-[3/2] overflow-hidden bg-gray-100 dark:bg-gray-700">
-                    {doc.thumbnailUrl ? (
-                      <img
-                        src={doc.thumbnailUrl}
-                        alt={doc.title}
-                        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                      />
-                    ) : (
-                      <div className="flex h-full w-full items-center justify-center bg-gray-200 dark:bg-gray-600">
-                        <span className="text-gray-500 dark:text-gray-400">
-                          لا توجد صورة
-                        </span>
-                      </div>
+                  </div>
+                  
+                  {/* Document badges */}
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {categoryName && (
+                      <Badge variant="info" size="md">
+                        <FaTag className="ml-1 h-3 w-3" />
+                        {categoryName}
+                      </Badge>
+                    )}
+                    
+                    {eraName && (
+                      <Badge variant="secondary" size="md">
+                        <FaHistory className="ml-1 h-3 w-3" />
+                        {eraName}
+                      </Badge>
+                    )}
+                    
+                    {document.published_at && (
+                      <Badge variant="secondary" size="md">
+                        <FaCalendarAlt className="ml-1 h-3 w-3" />
+                        {new Date(document.published_at).toLocaleDateString('ar-SA')}
+                      </Badge>
+                    )}
+                    
+                    {document.is_premium && (
+                      <Badge variant="warning" size="md">
+                        حصري
+                      </Badge>
                     )}
                   </div>
-                  <div className="p-4">
-                    <h3 className="mb-2 line-clamp-1 text-lg font-semibold text-gray-900 dark:text-white">
-                      {doc.title}
-                    </h3>
-                    <p className="line-clamp-2 text-sm text-gray-600 dark:text-gray-400">
-                      {doc.description || 'لا يوجد وصف متاح لهذه الوثيقة.'}
+                </div>
+                
+                {/* Document stats */}
+                <div className="flex flex-wrap gap-4 text-sm text-[#8E8E93] dark:text-gray-400">
+                  {document.view_count !== undefined && (
+                    <div className="flex items-center gap-1">
+                      <FaEye className="h-4 w-4" />
+                      <span>{document.view_count} مشاهدة</span>
+                    </div>
+                  )}
+                  
+                  {document.page_count !== undefined && (
+                    <div className="flex items-center gap-1">
+                      <FaFileAlt className="h-4 w-4" />
+                      <span>{document.page_count} صفحة</span>
+                    </div>
+                  )}
+                  
+                  {document.expand?.author && (
+                    <div className="flex items-center gap-1">
+                      <FaUser className="h-4 w-4" />
+                      <span>{document.expand.author.name || 'غير معروف'}</span>
+                    </div>
+                  )}
+                </div>
+                
+                {/* Document actions */}
+                <div className="flex flex-wrap gap-3">
+                  <Button
+                    variant="primary"
+                    size="md"
+                    leftIcon={<FaDownload className="h-4 w-4" />}
+                    onClick={handleDownload}
+                    disabled={!hasMedia}
+                  >
+                    تنزيل
+                  </Button>
+                  
+                  <Button
+                    variant="secondary"
+                    size="md"
+                    leftIcon={<FaShare className="h-4 w-4" />}
+                    onClick={handleShare}
+                  >
+                    مشاركة
+                  </Button>
+                </div>
+                
+                {/* Document summary */}
+                {document.summary && (
+                  <div>
+                    <h2 className="mb-2 text-xl font-semibold text-[#1C1C1E] dark:text-white">
+                      نبذة عن الوثيقة
+                    </h2>
+                    <p className="text-[#3C3C43] dark:text-gray-300">
+                      {document.summary}
                     </p>
                   </div>
-                </Link>
-              ))}
+                )}
+                
+                {/* Document content */}
+                <div>
+                  <h2 className="mb-2 text-xl font-semibold text-[#1C1C1E] dark:text-white">
+                    محتوى الوثيقة
+                  </h2>
+                  <Card className="p-6 border border-[#E5E5EA] dark:border-gray-700">
+                    <div 
+                      className="prose prose-lg dark:prose-invert max-w-none prose-headings:text-[#1C1C1E] prose-p:text-[#3C3C43] prose-a:text-[#007AFF]"
+                      dangerouslySetInnerHTML={{ __html: document.content }}
+                    />
+                  </Card>
+                </div>
+                
+                {/* Document metadata */}
+                {document.expand?.author && (
+                  <div>
+                    <h2 className="mb-2 text-xl font-semibold text-[#1C1C1E] dark:text-white">
+                      معلومات المؤلف
+                    </h2>
+                    <Card className="p-6 border border-[#E5E5EA] dark:border-gray-700">
+                      <div className="flex items-center gap-4">
+                        <Avatar 
+                          size="lg"
+                          src={document.expand.author.avatar ? getPocketBase().getFileUrl(document.expand.author, document.expand.author.avatar) : ''}
+                          alt={document.expand.author.name || ''}
+                        />
+                        <div>
+                          <h3 className="text-lg font-medium text-[#1C1C1E] dark:text-white">
+                            {document.expand.author.name || 'غير معروف'}
+                          </h3>
+                          {document.expand.author.email && (
+                            <p className="text-sm text-[#8E8E93] dark:text-gray-400">
+                              {document.expand.author.email}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    </Card>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        {/* Related documents */}
+        {relatedDocs.length > 0 && (
+          <div className="mt-12">
+            <h2 className="mb-6 text-2xl font-bold text-[#1C1C1E] dark:text-white">
+              وثائق مشابهة
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {relatedDocs.map((doc) => {
+                // Find category and era names for related docs
+                const docCategoryName = categories.find(c => c.id === doc.category)?.name || '';
+                const docEraName = ages.find(a => a.id === doc.age)?.name || '';
+                const mediaItem = doc.expand?.media?.[0];
+                const imageUrl = mediaItem && mediaItem.file 
+                  ? getPocketBase().getFileUrl(mediaItem, mediaItem.file)
+                  : '';
+                
+                return (
+                  <DocumentCard
+                    key={doc.id}
+                    id={doc.id}
+                    title={doc.title}
+                    description={doc.summary || doc.content.replace(/<[^>]*>/g, '').substring(0, 120) + '...'}
+                    imageUrl={imageUrl}
+                    date={doc.published_at || doc.created}
+                    category={docCategoryName}
+                    era={docEraName}
+                    pageCount={doc.page_count}
+                    viewCount={doc.view_count}
+                    isPremium={doc.is_premium}
+                    variant="vertical"
+                  />
+                );
+              })}
             </div>
           </div>
         )}

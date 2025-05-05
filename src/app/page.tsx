@@ -1,221 +1,190 @@
+/**
+ * Home Page
+ * 
+ * Main landing page for the Digital Historical Library with iOS-style UI.
+ * Showcases the library's features and document collections.
+ * Dynamically loads data from PocketBase.
+ */
+import { HistoricalAgeAPI } from '@/lib/api';
+import { Navigation } from '@/components/shared/Navigation';
+import { Hero } from '@/components/shared/Hero';
+import { Footer } from '@/components/shared/Footer';
+import { Card, CardImage, CardContent, CardMeta, CardFooter } from '@/components/ui/Card';
+import { Button } from '@/components/ui/Button';
+import { Badge } from '@/components/ui/Badge';
+import { FeatureCard } from '@/components/shared/FeatureCard';
 import Link from 'next/link';
-import { FaBook, FaSearch, FaHistory, FaUserEdit } from 'react-icons/fa';
-import { MainLayout } from '@/components/layout/MainLayout';
+import { HistoricalAge } from '@/types';
 
-export default function HomePage() {
+// Default image for fallback
+const DEFAULT_ERA_IMAGE = "https://images.unsplash.com/photo-1461360228754-6e81c478b882?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80";
+
+// Function to count documents for an era (placeholder - will be implemented with real data)
+const getDocumentCount = async (eraId: string): Promise<number> => {
+  // In a real implementation, you would fetch the actual count from PocketBase
+  // For now, return a random number between 200 and 800
+  return Math.floor(Math.random() * 600) + 200;
+};
+
+export default async function Home() {
+  // Fetch historical ages from PocketBase
+  const ageApi = new HistoricalAgeAPI();
+  const agesResponse = await ageApi.getAll();
+  
+  // Use real data if available, otherwise use empty array
+  const historicalAges: HistoricalAge[] = agesResponse.success ? (agesResponse.data || []) : [];
+  
+  // Get document counts for each era
+  const agesWithCounts = await Promise.all(
+    historicalAges.map(async (age) => {
+      const documentCount = await getDocumentCount(age.id);
+      return {
+        ...age,
+        documentCount,
+        languages: 8, // Fixed for now, could be dynamic in the future
+        // Use a default image URL if none is provided
+        imageUrl: DEFAULT_ERA_IMAGE
+      };
+    })
+  );
+  
+  // Features data - this could also come from a CMS in the future
+  const features = [
+    {
+      icon: <i className="fas fa-book-open"></i>,
+      title: "أرشيف غني",
+      description: "مجموعة شاملة من الوثائق التاريخية تغطي مختلف العصور والحقب الزمنية بتفاصيل دقيقة"
+    },
+    {
+      icon: <i className="fas fa-search-plus"></i>,
+      title: "استكشاف متقدم",
+      description: "أدوات بحث متطورة تتيح للباحثين والمؤرخين استكشاف الوثائق بسهولة وفعالية"
+    },
+    {
+      icon: <i className="fas fa-language"></i>,
+      title: "ترجمة فورية",
+      description: "ترجمة آلية دقيقة للوثائق التاريخية إلى ثمان لغات مختلفة باستخدام نماذج لغوية متقدمة"
+    },
+    {
+      icon: <i className="fas fa-desktop"></i>,
+      title: "تجربة تفاعلية",
+      description: "واجهة مستخدم سهلة وتفاعلية تعمل على جميع الأجهزة مع دعم كامل للتصفح الصوتي"
+    },
+    {
+      icon: <i className="fas fa-eye"></i>,
+      title: "تعرف بصري",
+      description: "استخدام تقنيات التعرف البصري لقراءة المخطوطات القديمة وتحويلها إلى نصوص رقمية"
+    },
+    {
+      icon: <i className="fas fa-microphone-alt"></i>,
+      title: "تعليق صوتي",
+      description: "تعليقات صوتية عالية الجودة مُنتجة بواسطة تقنية تحويل النص إلى كلام بصوت طبيعي"
+    }
+  ];
+
   return (
-    <MainLayout>
+    <>
+      {/* Skip to main content for accessibility */}
+      <a href="#main-content" className="sr-only">تخطي إلى المحتوى الرئيسي</a>
+      
+      {/* Navigation */}
+      <Navigation />
+      
       {/* Hero Section */}
-      <section className="bg-gradient-to-b from-primary-50 to-white py-16 dark:from-gray-800 dark:to-gray-900">
-        <div className="container mx-auto px-4 py-8 text-center">
-          <h1 className="mb-6 text-4xl font-bold text-primary-900 dark:text-white md:text-5xl">
-            المكتبة التاريخية <span className="text-primary">الرقمية</span>
-          </h1>
-          <p className="mx-auto mb-8 max-w-2xl text-xl text-gray-600 dark:text-gray-300">
-            اكتشف كنوز التاريخ من خلال مجموعتنا الفريدة من الوثائق التاريخية الرقمية المحفوظة والمصنفة بعناية
-          </p>
-          <div className="flex flex-wrap justify-center gap-4">
-            <Link
-              href="/browse"
-              className="rounded-lg bg-primary px-6 py-3 text-lg font-semibold text-white shadow-lg transition hover:bg-primary-dark hover:shadow-xl"
-            >
-              تصفح الوثائق
-            </Link>
-            <Link
-              href="/register"
-              className="rounded-lg border border-primary bg-transparent px-6 py-3 text-lg font-semibold text-primary transition hover:bg-primary-50 dark:hover:bg-gray-800"
-            >
-              انضم إلينا
-            </Link>
+      <Hero />
+      
+      {/* Main Content */}
+      <main id="main-content">
+        {/* Historical Eras Section */}
+        <section id="ages" className="section" aria-labelledby="ages-title">
+          <div className="container">
+            <h2 id="ages-title" className="section-title">العصور <span>التاريخية</span></h2>
+            <div className="section-description">
+              <p>استكشف مجموعتنا الفريدة من الوثائق التاريخية المصنفة حسب العصور المختلفة، مع قاعدة بيانات غنية ومتنوعة من المخطوطات والمستندات النادرة</p>
+            </div>
+            
+            {agesWithCounts.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {agesWithCounts.map((era) => (
+                  <Card key={era.id}>
+                    <div className="absolute top-4 right-4 z-10">
+                      <Badge variant="primary" rounded>
+                        <i className="fas fa-history"></i>
+                        <span className="mr-1">وثائق أصلية</span>
+                      </Badge>
+                    </div>
+                    
+                    <CardImage 
+                      src={era.imageUrl} 
+                      alt={era.name} 
+                      className="card-img"
+                    />
+                    
+                    <CardContent>
+                      <h3 className="text-xl font-bold mb-2">{era.name}</h3>
+                      <p className="text-sm text-theme-text-secondary">
+                        {era.description 
+                          ? era.description.replace(/<[^>]*>/g, '').substring(0, 120) + '...'
+                          : `استكشف الوثائق التاريخية من ${era.name} بمختلف أنواعها وتصنيفاتها`}
+                      </p>
+                      
+                      <CardMeta>
+                        <span>
+                          <i className="fas fa-file-alt"></i>
+                          {era.documentCount}+ وثيقة
+                        </span>
+                        <span>
+                          <i className="fas fa-language"></i>
+                          {era.languages} لغات
+                        </span>
+                      </CardMeta>
+                      
+                      <CardFooter>
+                        <Link href={`/browse?age=${era.id}`} passHref>
+                          <Button variant="primary" className="w-full">
+                            <i className="fas fa-search"></i>
+                            <span className="mr-2">عرض الوثائق</span>
+                          </Button>
+                        </Link>
+                      </CardFooter>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <p className="text-lg text-theme-text-secondary">
+                  جاري تحميل العصور التاريخية...
+                </p>
+              </div>
+            )}
           </div>
-        </div>
-      </section>
-
-      {/* Features Section */}
-      <section className="py-16">
-        <div className="container mx-auto px-4">
-          <h2 className="mb-12 text-center text-3xl font-bold">خدماتنا المميزة</h2>
-          <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4">
-            {/* Feature 1 */}
-            <div className="rounded-lg bg-white p-6 shadow-md transition hover:shadow-lg dark:bg-gray-800">
-              <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-primary-100 text-primary dark:bg-gray-700">
-                <FaSearch className="h-6 w-6" />
-              </div>
-              <h3 className="mb-3 text-xl font-semibold">بحث متقدم</h3>
-              <p className="text-gray-600 dark:text-gray-300">
-                امكانية البحث في الوثائق التاريخية بواسطة العصر، التصنيف، أو الكلمات المفتاحية
-              </p>
+        </section>
+        
+        {/* Features Section */}
+        <section id="features" className="section" style={{ backgroundColor: 'var(--secondary-background)' }} aria-labelledby="features-title">
+          <div className="container">
+            <h2 id="features-title" className="section-title">مميزات <span>المكتبة</span></h2>
+            <div className="section-description">
+              <p>اكتشف المميزات الفريدة التي توفرها مكتبتنا الرقمية المدعومة بأحدث تقنيات الذكاء الاصطناعي والأمان</p>
             </div>
-
-            {/* Feature 2 */}
-            <div className="rounded-lg bg-white p-6 shadow-md transition hover:shadow-lg dark:bg-gray-800">
-              <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-primary-100 text-primary dark:bg-gray-700">
-                <FaBook className="h-6 w-6" />
-              </div>
-              <h3 className="mb-3 text-xl font-semibold">وثائق مصنفة</h3>
-              <p className="text-gray-600 dark:text-gray-300">
-                وثائق مصنفة حسب العصور التاريخية والفئات لسهولة الوصول والتنظيم
-              </p>
-            </div>
-
-            {/* Feature 3 */}
-            <div className="rounded-lg bg-white p-6 shadow-md transition hover:shadow-lg dark:bg-gray-800">
-              <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-primary-100 text-primary dark:bg-gray-700">
-                <FaHistory className="h-6 w-6" />
-              </div>
-              <h3 className="mb-3 text-xl font-semibold">تنوع تاريخي</h3>
-              <p className="text-gray-600 dark:text-gray-300">
-                وثائق من مختلف العصور التاريخية: القديم، الوسيط، الحديث والمعاصر
-              </p>
-            </div>
-
-            {/* Feature 4 */}
-            <div className="rounded-lg bg-white p-6 shadow-md transition hover:shadow-lg dark:bg-gray-800">
-              <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-primary-100 text-primary dark:bg-gray-700">
-                <FaUserEdit className="h-6 w-6" />
-              </div>
-              <h3 className="mb-3 text-xl font-semibold">طلب وثائق</h3>
-              <p className="text-gray-600 dark:text-gray-300">
-                إمكانية طلب وثائق محددة غير متوفرة حاليًا في المكتبة
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Historical Eras Section */}
-      <section className="bg-gray-50 py-16 dark:bg-gray-900">
-        <div className="container mx-auto px-4">
-          <h2 className="mb-12 text-center text-3xl font-bold">العصور التاريخية</h2>
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
-            {/* Era 1 */}
-            <Link href="/browse?age=1" className="block">
-              <div className="rounded-lg bg-white p-6 shadow-md transition hover:shadow-lg dark:bg-gray-800">
-                <h3 className="mb-3 text-xl font-semibold">العصر القديم</h3>
-                <p className="mb-4 text-gray-600 dark:text-gray-300">
-                  من بداية التاريخ المكتوب حتى سقوط الإمبراطورية الرومانية الغربية
-                </p>
-                <span className="mt-auto text-primary hover:underline">تصفح الوثائق</span>
-              </div>
-            </Link>
-
-            {/* Era 2 */}
-            <Link href="/browse?age=2" className="block">
-              <div className="rounded-lg bg-white p-6 shadow-md transition hover:shadow-lg dark:bg-gray-800">
-                <h3 className="mb-3 text-xl font-semibold">العصر الوسيط</h3>
-                <p className="mb-4 text-gray-600 dark:text-gray-300">
-                  من القرن الخامس حتى القرن الخامس عشر الميلادي
-                </p>
-                <span className="mt-auto text-primary hover:underline">تصفح الوثائق</span>
-              </div>
-            </Link>
-
-            {/* Era 3 */}
-            <Link href="/browse?age=3" className="block">
-              <div className="rounded-lg bg-white p-6 shadow-md transition hover:shadow-lg dark:bg-gray-800">
-                <h3 className="mb-3 text-xl font-semibold">العصر الحديث</h3>
-                <p className="mb-4 text-gray-600 dark:text-gray-300">
-                  من القرن السادس عشر حتى نهاية الحرب العالمية الثانية
-                </p>
-                <span className="mt-auto text-primary hover:underline">تصفح الوثائق</span>
-              </div>
-            </Link>
-
-            {/* Era 4 */}
-            <Link href="/browse?age=4" className="block">
-              <div className="rounded-lg bg-white p-6 shadow-md transition hover:shadow-lg dark:bg-gray-800">
-                <h3 className="mb-3 text-xl font-semibold">العصر المعاصر</h3>
-                <p className="mb-4 text-gray-600 dark:text-gray-300">
-                  من نهاية الحرب العالمية الثانية حتى يومنا هذا
-                </p>
-                <span className="mt-auto text-primary hover:underline">تصفح الوثائق</span>
-              </div>
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* Call to Action */}
-      <section className="bg-primary py-16 text-white">
-        <div className="container mx-auto px-4 text-center">
-          <h2 className="mb-6 text-3xl font-bold">ابدأ رحلتك التاريخية</h2>
-          <p className="mx-auto mb-8 max-w-2xl text-lg">
-            انضم إلينا اليوم واستكشف آلاف الوثائق التاريخية من مختلف العصور
-          </p>
-          <Link
-            href="/register"
-            className="inline-block rounded-lg bg-white px-6 py-3 text-lg font-semibold text-primary shadow-lg transition hover:bg-gray-100"
-          >
-            إنشاء حساب مجاني
-          </Link>
-        </div>
-      </section>
-
-      {/* Contact Section */}
-      <section id="contact" className="py-16">
-        <div className="container mx-auto px-4">
-          <h2 className="mb-12 text-center text-3xl font-bold">اتصل بنا</h2>
-          <div className="mx-auto max-w-3xl rounded-lg bg-white p-8 shadow-lg dark:bg-gray-800">
-            <p className="mb-6 text-center text-gray-600 dark:text-gray-300">
-              لديك استفسار أو اقتراح؟ نحن هنا للمساعدة! يمكنك التواصل معنا من خلال النموذج التالي.
-            </p>
-            <form className="space-y-6">
-              <div className="grid gap-6 md:grid-cols-2">
-                <div>
-                  <label htmlFor="name" className="mb-2 block text-sm font-medium">
-                    الاسم
-                  </label>
-                  <input
-                    type="text"
-                    id="name"
-                    className="w-full rounded-lg border border-gray-300 p-3 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary dark:border-gray-600 dark:bg-gray-700"
-                    placeholder="أدخل اسمك"
-                  />
-                </div>
-                <div>
-                  <label htmlFor="email" className="mb-2 block text-sm font-medium">
-                    البريد الإلكتروني
-                  </label>
-                  <input
-                    type="email"
-                    id="email"
-                    className="w-full rounded-lg border border-gray-300 p-3 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary dark:border-gray-600 dark:bg-gray-700"
-                    placeholder="أدخل بريدك الإلكتروني"
-                  />
-                </div>
-              </div>
-              <div>
-                <label htmlFor="subject" className="mb-2 block text-sm font-medium">
-                  الموضوع
-                </label>
-                <input
-                  type="text"
-                  id="subject"
-                  className="w-full rounded-lg border border-gray-300 p-3 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary dark:border-gray-600 dark:bg-gray-700"
-                  placeholder="أدخل موضوع الرسالة"
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {features.map((feature, index) => (
+                <FeatureCard
+                  key={index}
+                  icon={feature.icon}
+                  title={feature.title}
+                  description={feature.description}
                 />
-              </div>
-              <div>
-                <label htmlFor="message" className="mb-2 block text-sm font-medium">
-                  الرسالة
-                </label>
-                <textarea
-                  id="message"
-                  rows={5}
-                  className="w-full rounded-lg border border-gray-300 p-3 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary dark:border-gray-600 dark:bg-gray-700"
-                  placeholder="اكتب رسالتك هنا"
-                ></textarea>
-              </div>
-              <button
-                type="submit"
-                className="w-full rounded-lg bg-primary py-3 text-white hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
-              >
-                إرسال الرسالة
-              </button>
-            </form>
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
-    </MainLayout>
+        </section>
+      </main>
+      
+      {/* Footer */}
+      <Footer />
+    </>
   );
 } 

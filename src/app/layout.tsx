@@ -22,7 +22,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ar" dir="rtl">
+      <head>
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="theme-color" content="#007AFF" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+      </head>
       <body className={`${amiri.className} font-sans`}>
+      <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
         <Toaster position="top-center" />
         {children}
       </body>
