@@ -1,0 +1,33 @@
+@import "tailwindcss/preflight";
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --primary: 42 84 150;
+    --primary-dark: 31 64 116;
+    --background: 255 255 255;
+    --foreground: 0 0 0;
+  }
+
+  .dark {
+    --primary: 82 124 190;
+    --primary-dark: 122 164 230;
+    --background: 15 23 42;
+    --foreground: 255 255 255;
+  }
+}
+
+@layer base {
+  body {
+    font-family: var(--font-amiri), system-ui, sans-serif;
+  }
+  
+  /* Override default focus styles */
+  a:focus-visible,
+  button:focus-visible,
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible {
+    @apply outline-none ring-2 ring-primary ring-offset-2 ring-offset-white dark:ring-offset-gray-900;
+  }
+}

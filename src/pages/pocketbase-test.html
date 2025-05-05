@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="description" content="اختبار PocketBase - المكتبة التاريخية الرقمية">
+  <meta name="theme-color" content="#007AFF">
+  <title>اختبار PocketBase - المكتبة التاريخية الرقمية</title>
+  <link rel="stylesheet" href="../styles/global.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    .connection-test {
+      background-color: var(--bg-secondary);
+      padding: 2rem;
+      border-radius: 1rem;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      margin-bottom: 2rem;
+      text-align: center;
+    }
+    
+    .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-weight: 600;
+      padding: 0.5rem 1rem;
+      border-radius: 0.5rem;
+      margin: 1rem 0;
+    }
+    
+    .status-connecting {
+      background-color: var(--warning-color);
+      color: white;
+    }
+    
+    .status-success {
+      background-color: var(--success-color);
+      color: white;
+    }
+    
+    .status-error {
+      background-color: var(--error-color);
+      color: white;
+    }
+    
+    .connection-details {
+      margin-top: 2rem;
+      text-align: left;
+      padding: 1rem;
+      background-color: var(--bg-tertiary);
+      border-radius: 0.5rem;
+      overflow: auto;
+      max-height: 400px;
+    }
+
+    .data-section {
+      margin-bottom: 3rem;
+      background-color: var(--bg-secondary);
+      padding: 2rem;
+      border-radius: 1rem;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .data-section h2 {
+      margin-bottom: 1.5rem;
+      border-bottom: 2px solid var(--primary-color);
+      padding-bottom: 0.5rem;
+    }
+    
+    .data-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.5rem;
+    }
+    
+    .data-card {
+      background-color: var(--bg-primary);
+      padding: 1.5rem;
+      border-radius: 0.5rem;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .data-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    
+    .data-card h3 {
+      margin-bottom: 1rem;
+      color: var(--primary-color);
+    }
+    
+    .data-prop {
+      margin-bottom: 0.5rem;
+      display: flex;
+      flex-wrap: wrap;
+    }
+    
+    .data-prop-name {
+      font-weight: 600;
+      margin-left: 0.5rem;
+      color: var(--text-secondary);
+    }
+    
+    .data-prop-value {
+      color: var(--text-primary);
+    }
+    
+    pre {
+      background-color: var(--bg-primary);
+      padding: 1rem;
+      border-radius: 0.5rem;
+      overflow: auto;
+      font-family: monospace;
+      white-space: pre-wrap;
+      color: var(--text-primary);
+    }
+
+    .btn-test {
+      margin: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+  <!-- Skip to main content for accessibility -->
+  <a href="#main-content" class="sr-only">تخطي إلى المحتوى الرئيسي</a>
+
+  <!-- Navigation -->
+  <header>
+    <div class="container">
+      <nav class="nav" id="main-nav">
+        <div class="nav-logo">
+          <a href="../../index.html">
+            <i class="fas fa-book-open"></i>
+            المكتبة التاريخية
+          </a>
+        </div>
+        <ul class="nav-links" id="menu">
+          <li><a href="../../index.html">الرئيسية</a></li>
+          <li><a href="browse.html">تصفح الوثائق</a></li>
+          <li><a href="request.html">طلب وثائق</a></li>
+          <li><a href="../../index.html#contact">اتصل بنا</a></li>
+        </ul>
+        <div class="nav-actions">
+          <button class="btn-icon" id="dark-mode-toggle" aria-label="تغيير الوضع المظلم">
+            <i class="fas fa-moon"></i>
+          </button>
+          <a href="login.html" id="login-button" class="btn btn-outline">
+            <i class="fas fa-sign-in-alt"></i>
+            تسجيل الدخول
+          </a>
+          <div id="user-menu" style="display:none;" class="user-dropdown">
+            <button class="btn btn-icon user-dropdown-trigger">
+              <i class="fas fa-user-circle"></i>
+              <span id="username">المستخدم</span>
+            </button>
+            <div class="dropdown-menu">
+              <a href="profile.html">
+                <i class="fas fa-user"></i>
+                الملف الشخصي
+              </a>
+              <a href="create-post.html">
+                <i class="fas fa-plus"></i>
+                إضافة وثيقة
+              </a>
+              <button id="logout-button" class="dropdown-item">
+                <i class="fas fa-sign-out-alt"></i>
+                تسجيل الخروج
+              </button>
+            </div>
+          </div>
+          <button class="nav-menu-btn" aria-expanded="false" aria-label="فتح القائمة" aria-controls="menu">
+            <i class="fas fa-bars"></i>
+          </button>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main-content">
+    <section class="section">
+      <div class="container">
+        <h1 class="section-title">اختبار <span>PocketBase</span></h1>
+        
+        <div class="connection-test">
+          <h2>اختبار الاتصال بقاعدة البيانات</h2>
+          <div id="connection-status" class="status status-connecting">
+            <i class="fas fa-spinner fa-spin"></i>
+            <span>جاري الاتصال...</span>
+          </div>
+          <div>
+            <button id="test-auth" class="btn btn-primary btn-test" disabled>
+              <i class="fas fa-user-check"></i>
+              اختبار المصادقة
+            </button>
+            <button id="test-historical-ages" class="btn btn-primary btn-test" disabled>
+              <i class="fas fa-clock"></i>
+              اختبار العصور التاريخية
+            </button>
+            <button id="test-categories" class="btn btn-primary btn-test" disabled>
+              <i class="fas fa-layer-group"></i>
+              اختبار التصنيفات
+            </button>
+            <button id="test-documents" class="btn btn-primary btn-test" disabled>
+              <i class="fas fa-file-alt"></i>
+              اختبار الوثائق
+            </button>
+          </div>
+          <div id="connection-details" class="connection-details" style="display: none;">
+            <pre id="connection-info">Waiting for connection test...</pre>
+          </div>
+        </div>
+        
+        <!-- Data sections - will be populated dynamically -->
+        <div id="historical-ages-section" class="data-section" style="display: none;">
+          <h2>العصور التاريخية</h2>
+          <div id="historical-ages-list" class="data-list"></div>
+        </div>
+        
+        <div id="categories-section" class="data-section" style="display: none;">
+          <h2>التصنيفات</h2>
+          <div id="categories-list" class="data-list"></div>
+        </div>
+        
+        <div id="documents-section" class="data-section" style="display: none;">
+          <h2>الوثائق</h2>
+          <div id="documents-list" class="data-list"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-brand">
+          <h3 class="footer-heading">
+            <i class="fas fa-book-open"></i>
+            المكتبة التاريخية
+          </h3>
+          <p>المكتبة التاريخية الرقمية هي مشروع يهدف إلى توثيق وحماية الوثائق التاريخية وعرضها بشكل رقمي مع ضمان أمانها وأصالتها.</p>
+        </div>
+        
+        <div class="footer-links-wrapper">
+          <div>
+            <h3 class="footer-heading">روابط سريعة</h3>
+            <ul class="footer-links">
+              <li><a href="../../index.html" class="footer-link">الرئيسية</a></li>
+              <li><a href="browse.html" class="footer-link">تصفح الوثائق</a></li>
+              <li><a href="request.html" class="footer-link">طلب وثائق</a></li>
+              <li><a href="../../index.html#contact" class="footer-link">اتصل بنا</a></li>
+            </ul>
+          </div>
+          
+          <div>
+            <h3 class="footer-heading">الخدمات</h3>
+            <ul class="footer-links">
+              <li><a href="browse.html" class="footer-link">البحث في الوثائق</a></li>
+              <li><a href="request.html" class="footer-link">طلب وثائق خاصة</a></li>
+              <li><a href="#" class="footer-link">البحث العلمي</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      
+      <div class="copyright">
+        <p>© ٢٠٢٣ المكتبة التاريخية الرقمية. جميع الحقوق محفوظة.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- JavaScript -->
+  <script type="module">
+    import { 
+      isAuthenticated, 
+      getCurrentUser, 
+      logout, 
+      getHistoricalAges, 
+      getCategories, 
+      getDocuments,
+      login,
+      register
+    } from '../js/pocketbase.js';
+    
+    document.addEventListener('DOMContentLoaded', async function() {
+      // Check authentication and update UI
+      updateAuthUI();
+      
+      // Test Connection
+      testConnection();
+      
+      // Event listeners for test buttons
+      document.getElementById('test-auth').addEventListener('click', testAuth);
+      document.getElementById('test-historical-ages').addEventListener('click', testHistoricalAges);
+      document.getElementById('test-categories').addEventListener('click', testCategories);
+      document.getElementById('test-documents').addEventListener('click', testDocuments);
+      
+      // Logout button
+      const logoutButton = document.getElementById('logout-button');
+      if (logoutButton) {
+        logoutButton.addEventListener('click', function() {
+          logout();
+          window.location.reload();
+        });
+      }
+      
+      // Mobile menu functionality
+      const menuBtn = document.querySelector('.nav-menu-btn');
+      const navLinks = document.querySelector('.nav-links');
+      
+      if (menuBtn && navLinks) {
+        menuBtn.addEventListener('click', function() {
+          navLinks.classList.toggle('active');
+          const isExpanded = menuBtn.getAttribute('aria-expanded') === 'true';
+          menuBtn.setAttribute('aria-expanded', !isExpanded);
+          menuBtn.innerHTML = isExpanded ? '<i class="fas fa-bars"></i>' : '<i class="fas fa-times"></i>';
+        });
+      }
+      
+      // Dark mode toggle
+      const darkModeToggle = document.getElementById('dark-mode-toggle');
+      const isDarkMode = localStorage.getItem('darkMode') === 'true';
+      
+      if (isDarkMode) {
+        document.body.classList.add('dark-mode');
+        darkModeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+      }
+      
+      darkModeToggle.addEventListener('click', function() {
+        document.body.classList.toggle('dark-mode');
+        const isCurrentlyDark = document.body.classList.contains('dark-mode');
+        localStorage.setItem('darkMode', isCurrentlyDark);
+        darkModeToggle.innerHTML = isCurrentlyDark ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+      });
+    });
+    
+    // Update UI based on authentication status
+    function updateAuthUI() {
+      const loginButton = document.getElementById('login-button');
+      const userMenu = document.getElementById('user-menu');
+      const username = document.getElementById('username');
+      
+      if (isAuthenticated()) {
+        const user = getCurrentUser();
+        
+        if (loginButton) loginButton.style.display = 'none';
+        if (userMenu) {
+          userMenu.style.display = 'block';
+          if (username && user) {
+            username.textContent = user.name || 'المستخدم';
+          }
+        }
+      } else {
+        if (loginButton) loginButton.style.display = 'block';
+        if (userMenu) userMenu.style.display = 'none';
+      }
+    }
+    
+    // Test connection to PocketBase
+    async function testConnection() {
+      const connectionStatus = document.getElementById('connection-status');
+      const connectionInfo = document.getElementById('connection-info');
+      const connectionDetails = document.getElementById('connection-details');
+      
+      try {
+        // Fetch a simple endpoint to test connection
+        const response = await fetch('http://127.0.0.1:8090/api/health');
+        const data = await response.json();
+        
+        // Update status
+        connectionStatus.className = 'status status-success';
+        connectionStatus.innerHTML = '<i class="fas fa-check-circle"></i><span>تم الاتصال بنجاح</span>';
+        
+        // Show connection details
+        connectionInfo.textContent = JSON.stringify(data, null, 2);
+        connectionDetails.style.display = 'block';
+        
+        // Enable test buttons
+        document.querySelectorAll('.btn-test').forEach(btn => {
+          btn.disabled = false;
+        });
+      } catch (error) {
+        // Update status
+        connectionStatus.className = 'status status-error';
+        connectionStatus.innerHTML = '<i class="fas fa-times-circle"></i><span>فشل الاتصال</span>';
+        
+        // Show error details
+        connectionInfo.textContent = JSON.stringify({ error: error.message }, null, 2);
+        connectionDetails.style.display = 'block';
+      }
+    }
+    
+    // Test authentication
+    async function testAuth() {
+      const connectionInfo = document.getElementById('connection-info');
+      connectionInfo.textContent = 'Testing authentication...';
+      
+      try {
+        // Check if already authenticated
+        const isUserAuthenticated = isAuthenticated();
+        const currentUser = getCurrentUser();
+        
+        const authInfo = {
+          isAuthenticated: isUserAuthenticated,
+          currentUser: currentUser
+        };
+        
+        // If not authenticated, try with test credentials
+        if (!isUserAuthenticated) {
+          try {
+            // Attempt login with test credentials (will likely fail, which is expected)
+            const loginResult = await login('test@example.com', 'password123');
+            authInfo.loginTest = loginResult;
+          } catch (loginError) {
+            authInfo.loginTest = { error: loginError.message };
+          }
+        }
+        
+        // Display auth info
+        connectionInfo.textContent = JSON.stringify(authInfo, null, 2);
+      } catch (error) {
+        connectionInfo.textContent = JSON.stringify({ error: error.message }, null, 2);
+      }
+    }
+    
+    // Test historical ages
+    async function testHistoricalAges() {
+      const connectionInfo = document.getElementById('connection-info');
+      connectionInfo.textContent = 'Fetching historical ages...';
+      
+      try {
+        const ages = await getHistoricalAges();
+        
+        // Display in connection info
+        connectionInfo.textContent = JSON.stringify(ages, null, 2);
+        
+        // Also display in the dedicated section
+        if (ages && ages.length > 0) {
+          const section = document.getElementById('historical-ages-section');
+          const list = document.getElementById('historical-ages-list');
+          
+          list.innerHTML = '';
+          
+          ages.forEach(age => {
+            const card = document.createElement('div');
+            card.className = 'data-card';
+            
+            card.innerHTML = `
+              <h3>${age.name}</h3>
+              <div class="data-prop">
+                <span class="data-prop-name">الوصف:</span>
+                <span class="data-prop-value">${age.description || 'لا يوجد وصف'}</span>
+              </div>
+              <div class="data-prop">
+                <span class="data-prop-name">الفترة:</span>
+                <span class="data-prop-value">${age.start_year || '؟'} - ${age.end_year || '؟'}</span>
+              </div>
+              <div class="data-prop">
+                <span class="data-prop-name">المعرف:</span>
+                <span class="data-prop-value">${age.id}</span>
+              </div>
+            `;
+            
+            list.appendChild(card);
+          });
+          
+          section.style.display = 'block';
+        }
+      } catch (error) {
+        connectionInfo.textContent = JSON.stringify({ error: error.message }, null, 2);
+      }
+    }
+    
+    // Test categories
+    async function testCategories() {
+      const connectionInfo = document.getElementById('connection-info');
+      connectionInfo.textContent = 'Fetching categories...';
+      
+      try {
+        const categories = await getCategories();
+        
+        // Display in connection info
+        connectionInfo.textContent = JSON.stringify(categories, null, 2);
+        
+        // Also display in the dedicated section
+        if (categories && categories.length > 0) {
+          const section = document.getElementById('categories-section');
+          const list = document.getElementById('categories-list');
+          
+          list.innerHTML = '';
+          
+          categories.forEach(category => {
+            const card = document.createElement('div');
+            card.className = 'data-card';
+            
+            card.innerHTML = `
+              <h3>${category.name}</h3>
+              <div class="data-prop">
+                <span class="data-prop-name">الوصف:</span>
+                <span class="data-prop-value">${category.description || 'لا يوجد وصف'}</span>
+              </div>
+              <div class="data-prop">
+                <span class="data-prop-name">المعرف:</span>
+                <span class="data-prop-value">${category.id}</span>
+              </div>
+              <div class="data-prop">
+                <span class="data-prop-name">التصنيف الأب:</span>
+                <span class="data-prop-value">${category.parent || 'لا يوجد'}</span>
+              </div>
+            `;
+            
+            list.appendChild(card);
+          });
+          
+          section.style.display = 'block';
+        }
+      } catch (error) {
+        connectionInfo.textContent = JSON.stringify({ error: error.message }, null, 2);
+      }
+    }
+    
+    // Test documents
+    async function testDocuments() {
+      const connectionInfo = document.getElementById('connection-info');
+      connectionInfo.textContent = 'Fetching documents...';
+      
+      try {
+        const result = await getDocuments();
+        
+        // Display in connection info
+        connectionInfo.textContent = JSON.stringify(result, null, 2);
+        
+        // Also display in the dedicated section
+        if (result.items && result.items.length > 0) {
+          const section = document.getElementById('documents-section');
+          const list = document.getElementById('documents-list');
+          
+          list.innerHTML = '';
+          
+          result.items.forEach(doc => {
+            const card = document.createElement('div');
+            card.className = 'data-card';
+            
+            const categoryName = doc.expand?.category?.name || 'غير مصنف';
+            const ageName = doc.expand?.age?.name || 'غير محدد';
+            
+            card.innerHTML = `
+              <h3>${doc.title}</h3>
+              <div class="data-prop">
+                <span class="data-prop-name">الملخص:</span>
+                <span class="data-prop-value">${doc.summary || 'لا يوجد ملخص'}</span>
+              </div>
+              <div class="data-prop">
+                <span class="data-prop-name">العصر:</span>
+                <span class="data-prop-value">${ageName}</span>
+              </div>
+              <div class="data-prop">
+                <span class="data-prop-name">التصنيف:</span>
+                <span class="data-prop-value">${categoryName}</span>
+              </div>
+              <div class="data-prop">
+                <span class="data-prop-name">المعرف:</span>
+                <span class="data-prop-value">${doc.id}</span>
+              </div>
+            `;
+            
+            list.appendChild(card);
+          });
+          
+          section.style.display = 'block';
+        }
+      } catch (error) {
+        connectionInfo.textContent = JSON.stringify({ error: error.message }, null, 2);
+      }
+    }
+  </script>
+</body>
+</html> 

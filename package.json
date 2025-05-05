@@ -1,11 +1,12 @@
 {
-  "name": "library-website",
-  "version": "1.0.0",
-  "description": "Static frontend for a historical document library",
-  "main": "src/main.js",
+  "name": "historical-library",
+  "version": "0.1.0",
+  "private": true,
   "scripts": {
-    "start": "lite-server --baseDir=\"src\"",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
   },
   "keywords": [
     "library",
@@ -15,10 +16,32 @@
   ],
   "author": "",
   "license": "ISC",
-  "devDependencies": {
-    "lite-server": "^2.6.1"
-  },
   "dependencies": {
-    "pocketbase": "^0.26.0"
+    "clsx": "^2.1.0",
+    "next": "^14.0.4",
+    "pocketbase": "^0.20.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-hot-toast": "^2.4.1",
+    "react-icons": "^4.12.0",
+    "tailwind-merge": "^2.2.0",
+    "next-auth": "^4.24.11",
+    "react-hook-form": "^7.56.2",
+    "zod": "^3.24.4"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3",
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "15.3.1",
+    "tailwindcss": "^4",
+    "typescript": "^5",
+    "autoprefixer": "^10.4.16",
+    "postcss": "^8.4.32",
+    "prettier": "^3.1.1",
+    "prettier-plugin-tailwindcss": "^0.5.9"
   }
 }

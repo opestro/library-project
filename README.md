@@ -1,6 +1,144 @@
-# المكتبة التاريخية الرقمية - Historical Digital Library
+# المكتبة التاريخية الرقمية | Historical Digital Library
 
-موقع مكتبة رقمية للوثائق التاريخية مع نظام إدارة محتوى مدعوم بـ PocketBase.
+This project is a Next.js application for a digital historical library where users can browse, search, view, and request historical documents and manuscripts.
+
+## Features
+
+- **Document Browsing**: Users can browse historical documents by age, category, or search terms.
+- **Document Details**: Detailed view of documents with historical context, metadata, and media files.
+- **User Authentication**: Registration, login, and profile management.
+- **Document Requests**: Users can request historical documents that aren't currently available.
+- **Contact System**: A contact form for users to send inquiries to the library administration.
+- **Responsive Design**: Fully responsive interface that works on all devices.
+- **Arabic Language Support**: The application is fully localized in Arabic with RTL support.
+- **Dark Mode**: Support for light and dark themes.
+
+## Technology Stack
+
+- **Frontend**: Next.js 14, React 18, TypeScript
+- **Styling**: Tailwind CSS
+- **Backend**: PocketBase (self-hosted BaaS)
+- **Icons**: react-icons
+- **Notifications**: react-hot-toast
+- **Data Fetching**: Custom API client for PocketBase
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js 18.17 or later
+- PocketBase server (for backend)
+
+### Installation
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/yourusername/historical-library.git
+   cd historical-library
+   ```
+
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+3. Set up environment variables:
+   Create a `.env.local` file in the root directory with the following content:
+   ```
+   NEXT_PUBLIC_POCKETBASE_URL=http://localhost:8090
+   ```
+   Adjust the URL based on your PocketBase server configuration.
+
+4. Start the development server:
+   ```bash
+   npm run dev
+   ```
+
+5. Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+
+### Setting up PocketBase
+
+1. [Download PocketBase](https://pocketbase.io/docs/) for your platform
+2. Start the PocketBase server:
+   ```bash
+   ./pocketbase serve
+   ```
+3. Navigate to the admin UI at `http://localhost:8090/_/` to set up your collections.
+4. Import the provided schema from `pb_schema.json` if available.
+
+## Project Structure
+
+```
+historical-library/
+├── public/                  # Static files
+│   ├── images/              # Image assets
+│   └── ...
+├── src/                     # Source code
+│   ├── app/                 # Next.js app router
+│   │   ├── layout.tsx      # Root layout
+│   │   ├── page.tsx        # Home page
+│   │   ├── browse/         # Document browsing
+│   │   ├── document/       # Document details
+│   │   ├── login/          # Authentication
+│   │   ├── profile/        # User profile
+│   │   ├── request/        # Document request
+│   │   └── contact/        # Contact page
+│   ├── components/          # React components
+│   │   ├── layout/         # Layout components
+│   │   └── ui/             # UI components
+│   ├── lib/                 # Utility functions
+│   │   ├── api.ts          # API client
+│   │   └── utils/          # Utility functions
+│   └── types/               # TypeScript types
+├── package.json             # NPM dependencies
+├── tsconfig.json            # TypeScript configuration
+├── tailwind.config.ts       # Tailwind CSS configuration
+└── README.md                # Project documentation
+```
+
+## Deployment
+
+The project can be deployed to any platform that supports Next.js applications, such as Vercel, Netlify, or your own server.
+
+### Build for Production
+
+```bash
+npm run build
+```
+
+### Start Production Server
+
+```bash
+npm start
+```
+
+## Development Guidelines
+
+- Follow the existing file structure and naming conventions
+- Use TypeScript for all new code
+- Add proper JSDoc comments for functions and components
+- Use Tailwind CSS for styling
+- Follow the established design system for UI components
+- Make sure all UI is responsive and supports both light and dark themes
+- Ensure all user-facing text is in Arabic and supports RTL layout
+
+## Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## License
+
+This project is licensed under the ISC License - see the LICENSE file for details.
+
+## Acknowledgments
+
+- The Amiri font used in this project is licensed under the SIL Open Font License
+- Icons provided by FontAwesome through react-icons
+- Design inspiration from various digital library projects around the world
 
 ## متطلبات النظام
 
@@ -169,7 +307,6 @@ Each historical era contains documents categorized as follows:
 - صورة
 - فيديو شرح
 - تعليق صوتي
-- ترجمة
 
 Each document contains:
 
@@ -178,7 +315,6 @@ Each document contains:
 - Image
 - Explanatory video
 - Audio commentary
-- Translation
 
 ## التقنيات المستخدمة - Technologies Used
 
