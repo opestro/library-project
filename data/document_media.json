@@ -1,0 +1,74 @@
+[
+  {
+    "id": "media1",
+    "document": "doc1",
+    "title": "النسخة الأصلية لمعاهدة وستفاليا",
+    "description": "صورة للنسخة الأصلية من معاهدة وستفاليا للسلام",
+    "file": "westphalia_original.jpg",
+    "file_type": "image/jpeg"
+  },
+  {
+    "id": "media2",
+    "document": "doc1",
+    "title": "توقيعات المعاهدة",
+    "description": "صورة تفصيلية لتوقيعات الأطراف المشاركة في معاهدة وستفاليا",
+    "file": "westphalia_signatures.jpg",
+    "file_type": "image/jpeg"
+  },
+  {
+    "id": "media3",
+    "document": "doc2",
+    "title": "نص صحيفة المدينة",
+    "description": "نسخة مخطوطة من نص صحيفة المدينة",
+    "file": "medina_constitution.jpg",
+    "file_type": "image/jpeg"
+  },
+  {
+    "id": "media4",
+    "document": "doc3",
+    "title": "خريطة الإدريسي الكاملة",
+    "description": "صورة كاملة لخريطة الإدريسي للعالم",
+    "file": "idrisi_map_full.jpg",
+    "file_type": "image/jpeg"
+  },
+  {
+    "id": "media5",
+    "document": "doc3",
+    "title": "تفاصيل خريطة الإدريسي",
+    "description": "صورة تفصيلية لجزء من خريطة الإدريسي توضح شبه الجزيرة العربية",
+    "file": "idrisi_map_detail.jpg",
+    "file_type": "image/jpeg"
+  },
+  {
+    "id": "media6",
+    "document": "doc4",
+    "title": "الرسالة الأولى من أينشتاين",
+    "description": "صورة لرسالة أينشتاين الأولى إلى الرئيس روزفلت",
+    "file": "einstein_letter1.jpg",
+    "file_type": "image/jpeg"
+  },
+  {
+    "id": "media7",
+    "document": "doc4",
+    "title": "الرسالة الثانية من أينشتاين",
+    "description": "صورة لرسالة أينشتاين الثانية إلى الرئيس روزفلت",
+    "file": "einstein_letter2.jpg",
+    "file_type": "image/jpeg"
+  },
+  {
+    "id": "media8",
+    "document": "doc5",
+    "title": "صفحة من دفتر تجارة الحرير",
+    "description": "صورة لإحدى صفحات دفتر تجارة الحرير توضح الكميات والأسعار",
+    "file": "silk_ledger_page1.jpg",
+    "file_type": "image/jpeg"
+  },
+  {
+    "id": "media9",
+    "document": "doc5",
+    "title": "قائمة التجار والوسطاء",
+    "description": "صورة لصفحة من الدفتر تحتوي على قائمة التجار والوسطاء",
+    "file": "silk_ledger_merchants.jpg",
+    "file_type": "image/jpeg"
+  }
+] 
