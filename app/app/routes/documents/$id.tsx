@@ -235,15 +235,17 @@ export default function DocumentDetailPage() {
         {/* Fixed Audio Player */}
         {document.voice && (
           <div className="fixed bottom-0 left-0 right-0 bg-white dark:bg-neutral-900 border-t border-neutral-200 dark:border-neutral-800 shadow-lg z-50">
-            <div className="container mx-auto px-4">
-              <MediaPlayer 
-                document={document} 
-                type="audio"
-                isFloating={true}
-                onPlay={() => setIsAudioPlaying(true)}
-                onPause={() => setIsAudioPlaying(false)}
-                onTimeUpdate={(time) => setAudioProgress(time)}
-              />
+            <div className="relative">
+                <div className="container mx-auto px-4">
+                <MediaPlayer 
+                    document={document} 
+                    type="audio"
+                    isFloating={true}
+                    onPlay={() => setIsAudioPlaying(true)}
+                    onPause={() => setIsAudioPlaying(false)}
+                    onTimeUpdate={(time) => setAudioProgress(time)}
+                    />
+                </div>
             </div>
           </div>
         )}

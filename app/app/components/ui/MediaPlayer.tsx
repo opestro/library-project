@@ -362,9 +362,9 @@ export default function MediaPlayer({
                   step="0.1"
                   value={progress}
                   onChange={handleProgressChange}
-                  className="w-full h-1 bg-neutral-200 dark:bg-neutral-700 rounded-full appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-0 [&::-webkit-slider-thumb]:h-0 [&::-moz-range-thumb]:w-0 [&::-moz-range-thumb]:h-0"
+                  className="absolute -top-0.5 left-0 right-0 w-full h-1 bg-neutral-200 dark:bg-neutral-700 rounded-full cursor-pointer [&::-webkit-slider-thumb]:w-0 [&::-webkit-slider-thumb]:h-0 [&::-moz-range-thumb]:w-0 [&::-moz-range-thumb]:h-0"
                   style={{
-                    background: `linear-gradient(to right, var(--primary-color) ${progress}%, rgb(229 231 235) ${progress}%)`
+                    background: `linear-gradient(to right, white ${progress}%, rgb(229 231 235) ${progress}%)`
                   }}
                 />
 
