@@ -8,6 +8,7 @@ export default {
     extend: {
       fontFamily: {
         alexandria: ['Alexandria', 'sans-serif'],
+        sans: ['Alexandria', 'ui-sans-serif', 'system-ui', 'sans-serif'],
       },
       colors: {
         // Apple-like color scheme
@@ -37,5 +38,7 @@ export default {
       },
     },
   },
-  plugins: [],
+  plugins: [
+    require('@tailwindcss/typography'),
+  ],
 } 
