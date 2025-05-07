@@ -1,141 +1,216 @@
-import { useState, useEffect, useRef } from 'react';
-import { RiPlayFill, RiPauseFill, RiVolumeMuteFill, RiVolumeUpFill, RiFullscreenFill, RiFullscreenExitFill, RiRepeatFill, RiDownloadFill } from 'react-icons/ri';
-import pb from '../../lib/pocketbase';
-import type { Document } from '../../lib/pocketbase';
+import { useRef, useState, useEffect } from 'react';
+import type { Document } from '~/lib/pocketbase';
+import pb from '~/lib/pocketbase';
+import {
+  RiPlayFill,
+  RiPauseFill,
+  RiVolumeMuteFill,
+  RiVolumeUpFill,
+  RiFullscreenFill,
+  RiFullscreenExitFill,
+  RiDownload2Line,
+  RiRepeatFill,
+  RiShuffleFill,
+  RiSkipBackFill,
+  RiSkipForwardFill,
+} from 'react-icons/ri';
+
+// Declare fullscreen API types
+declare global {
+  interface Document {
+    fullscreenElement: Element | null;
+    webkitFullscreenElement: Element | null;
+    mozFullScreenElement: Element | null;
+    msFullscreenElement: Element | null;
+    exitFullscreen: () => Promise<void>;
+    webkitExitFullscreen: () => Promise<void>;
+    mozCancelFullScreen: () => Promise<void>;
+    msExitFullscreen: () => Promise<void>;
+  }
+
+  interface HTMLElement {
+    requestFullscreen: () => Promise<void>;
+    webkitRequestFullscreen: () => Promise<void>;
+    mozRequestFullScreen: () => Promise<void>;
+    msRequestFullscreen: () => Promise<void>;
+  }
+}
 
 interface MediaPlayerProps {
   document: Document;
-  type: 'audio' | 'video';
+  type: 'video' | 'audio';
+  onPlay?: () => void;
+  onPause?: () => void;
+  onTimeUpdate?: (currentTime: number) => void;
+  isFloating?: boolean;
 }
 
 /**
- * An advanced media player component with custom controls and tracking
+ * Enhanced media player component that supports both audio and video playback
  * Features:
- * - Custom play/pause controls
- * - Progress tracking with seek functionality
- * - Volume control with mute toggle
- * - Fullscreen support for videos
+ * - Custom controls with play/pause, volume, progress bar
+ * - Video poster image support
+ * - Floating audio player mode
  * - Download option
- * - Time display
- * - Auto-hide controls for video
- * 
- * @param document - The document object containing media files
- * @param type - The type of media player to render ('audio' | 'video')
+ * - Fullscreen support for videos
  */
-export default function MediaPlayer({ document, type }: MediaPlayerProps) {
-  const mediaRef = useRef<HTMLVideoElement | HTMLAudioElement>(null);
-  const progressRef = useRef<HTMLDivElement>(null);
+export default function MediaPlayer({ 
+  document, 
+  type,
+  onPlay,
+  onPause,
+  onTimeUpdate,
+  isFloating = false
+}: MediaPlayerProps) {
   const [isPlaying, setIsPlaying] = useState(false);
-  const [progress, setProgress] = useState(0);
-  const [duration, setDuration] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [progress, setProgress] = useState(0);
   const [volume, setVolume] = useState(1);
   const [isMuted, setIsMuted] = useState(false);
-  const [isFullscreen, setIsFullscreen] = useState(false);
   const [showControls, setShowControls] = useState(true);
-  const controlsTimeoutRef = useRef<NodeJS.Timeout>();
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isLooping, setIsLooping] = useState(false);
+  const [isSeeking, setIsSeeking] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
 
-  // Get the media URL based on type
+  const mediaRef = useRef<HTMLVideoElement | HTMLAudioElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const progressBarRef = useRef<HTMLDivElement>(null);
+  const controlsTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
+
   const mediaUrl = type === 'video' 
-    ? document.video ? pb.files.getUrl(document, document.video) : null
-    : document.voice ? pb.files.getUrl(document, document.voice) : null;
+    ? pb.files.getUrl(document, document.video!)
+    : pb.files.getUrl(document, document.voice!);
 
-  // Format time in MM:SS format
   const formatTime = (timeInSeconds: number) => {
-    const mins = Math.floor(timeInSeconds / 60);
-    const secs = Math.floor(timeInSeconds % 60);
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
+    const minutes = Math.floor(timeInSeconds / 60);
+    const seconds = Math.floor(timeInSeconds % 60);
+    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
   };
 
-  // Handle play/pause
   const togglePlay = () => {
-    if (mediaRef.current) {
-      if (isPlaying) {
-        mediaRef.current.pause();
-      } else {
-        mediaRef.current.play();
-      }
+    if (!mediaRef.current) return;
+    
+    if (isPlaying) {
+      mediaRef.current.pause();
+    } else {
+      mediaRef.current.play();
     }
   };
 
-  // Handle volume change
   const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newVolume = parseFloat(e.target.value);
-    setVolume(newVolume);
     if (mediaRef.current) {
       mediaRef.current.volume = newVolume;
+      setVolume(newVolume);
       setIsMuted(newVolume === 0);
     }
   };
 
-  // Handle mute toggle
   const toggleMute = () => {
-    if (mediaRef.current) {
-      mediaRef.current.muted = !isMuted;
-      setIsMuted(!isMuted);
-      if (!isMuted) {
-        mediaRef.current.volume = 0;
-        setVolume(0);
-      } else {
-        mediaRef.current.volume = 1;
-        setVolume(1);
-      }
+    if (!mediaRef.current) return;
+    
+    if (isMuted) {
+      mediaRef.current.volume = volume;
+      setIsMuted(false);
+    } else {
+      mediaRef.current.volume = 0;
+      setIsMuted(true);
     }
   };
 
-  // Handle fullscreen toggle
   const toggleFullscreen = () => {
-    const container = mediaRef.current?.parentElement;
-    if (!container) return;
-
-    if (!document.fullscreenElement && container.requestFullscreen) {
-      container.requestFullscreen()
-        .then(() => setIsFullscreen(true))
-        .catch(console.error);
-    } else if (document.fullscreenElement && document.exitFullscreen) {
-      document.exitFullscreen()
-        .then(() => setIsFullscreen(false))
-        .catch(console.error);
+    if (!containerRef.current) return;
+    
+    const container = containerRef.current;
+    const doc = document as any;
+    
+    if (!doc.fullscreenElement && !doc.webkitFullscreenElement &&
+        !doc.mozFullScreenElement && !doc.msFullscreenElement) {
+      if (container.requestFullscreen) {
+        container.requestFullscreen();
+      } else if (container.webkitRequestFullscreen) {
+        container.webkitRequestFullscreen();
+      } else if (container.mozRequestFullScreen) {
+        container.mozRequestFullScreen();
+      } else if (container.msRequestFullscreen) {
+        container.msRequestFullscreen();
+      }
+      setIsFullscreen(true);
+    } else {
+      if (doc.exitFullscreen) {
+        doc.exitFullscreen();
+      } else if (doc.webkitExitFullscreen) {
+        doc.webkitExitFullscreen();
+      } else if (doc.mozCancelFullScreen) {
+        doc.mozCancelFullScreen();
+      } else if (doc.msExitFullscreen) {
+        doc.msExitFullscreen();
+      }
+      setIsFullscreen(false);
     }
   };
 
-  // Handle progress bar click
-  const handleProgressClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (progressRef.current && mediaRef.current) {
-      const rect = progressRef.current.getBoundingClientRect();
-      const pos = (e.clientX - rect.left) / rect.width;
-      mediaRef.current.currentTime = pos * duration;
-    }
+  const handleProgressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!mediaRef.current) return;
+    
+    const newTime = (parseFloat(e.target.value) / 100) * duration;
+    mediaRef.current.currentTime = newTime;
+    setProgress(parseFloat(e.target.value));
+    setCurrentTime(newTime);
   };
 
-  // Handle media events
   useEffect(() => {
+    if (!mediaRef.current) return;
+
     const media = mediaRef.current;
-    if (!media) return;
 
     const handleTimeUpdate = () => {
-      setCurrentTime(media.currentTime);
-      setProgress((media.currentTime / media.duration) * 100);
+      if (!media || isSeeking) return;
+      const current = media.currentTime;
+      const duration = media.duration;
+      setCurrentTime(current);
+      setProgress((current / duration) * 100);
+      onTimeUpdate?.(current);
     };
 
     const handleLoadedMetadata = () => {
       setDuration(media.duration);
+      setIsLoaded(true);
     };
 
-    const handlePlay = () => setIsPlaying(true);
-    const handlePause = () => setIsPlaying(false);
+    const handlePlay = () => {
+      setIsPlaying(true);
+      onPlay?.();
+    };
+
+    const handlePause = () => {
+      setIsPlaying(false);
+      onPause?.();
+    };
+
     const handleEnded = () => {
       setIsPlaying(false);
       setProgress(0);
       setCurrentTime(0);
+      if (isLooping) {
+        media.currentTime = 0;
+        media.play();
+      }
     };
 
+    // Add event listeners
     media.addEventListener('timeupdate', handleTimeUpdate);
     media.addEventListener('loadedmetadata', handleLoadedMetadata);
     media.addEventListener('play', handlePlay);
     media.addEventListener('pause', handlePause);
     media.addEventListener('ended', handleEnded);
 
+    // Set initial volume
+    media.volume = volume;
+
+    // Cleanup
     return () => {
       media.removeEventListener('timeupdate', handleTimeUpdate);
       media.removeEventListener('loadedmetadata', handleLoadedMetadata);
@@ -143,173 +218,203 @@ export default function MediaPlayer({ document, type }: MediaPlayerProps) {
       media.removeEventListener('pause', handlePause);
       media.removeEventListener('ended', handleEnded);
     };
-  }, []);
-
-  // Handle auto-hide controls for video
-  useEffect(() => {
-    if (type === 'video') {
-      const handleMouseMove = () => {
-        setShowControls(true);
-        if (controlsTimeoutRef.current) {
-          clearTimeout(controlsTimeoutRef.current);
-        }
-        controlsTimeoutRef.current = setTimeout(() => {
-          if (isPlaying) {
-            setShowControls(false);
-          }
-        }, 3000);
-      };
-
-      const container = mediaRef.current?.parentElement;
-      if (container) {
-        container.addEventListener('mousemove', handleMouseMove);
-        container.addEventListener('mouseleave', () => setShowControls(false));
-
-        return () => {
-          container.removeEventListener('mousemove', handleMouseMove);
-          container.removeEventListener('mouseleave', () => setShowControls(false));
-          if (controlsTimeoutRef.current) {
-            clearTimeout(controlsTimeoutRef.current);
-          }
-        };
-      }
-    }
-  }, [type, isPlaying]);
+  }, [onPlay, onPause, onTimeUpdate, isLooping, isSeeking, volume]);
 
   if (!mediaUrl) return null;
 
+  const playerClassNames = `
+    relative overflow-hidden
+    ${type === 'video' ? 'aspect-video bg-black' : ''}
+    ${isFloating ? 'fixed bottom-0 right-0 left-0 z-50 bg-white dark:bg-neutral-900 shadow-lg border-t border-neutral-200 dark:border-neutral-800' : ''}
+  `.trim();
+
+  const controlsClassNames = `
+    absolute bottom-0 left-0 right-0
+    ${type === 'video' ? 'p-4 bg-gradient-to-t from-black/80 to-transparent' : 'p-2'}
+    ${showControls || !isPlaying || type === 'audio' ? 'opacity-100' : 'opacity-0'}
+    transition-opacity duration-300
+  `.trim();
+
   return (
-    <div className="relative w-full rounded-lg overflow-hidden bg-neutral-100 dark:bg-neutral-800 shadow-lg group">
+    <div 
+      ref={containerRef}
+      className={`relative ${
+        type === 'video' 
+          ? 'aspect-video bg-black w-full max-w-full' 
+          : isFloating 
+            ? 'fixed bottom-0 left-0 right-0 h-16 md:h-20 bg-white dark:bg-neutral-900 border-t border-neutral-200 dark:border-neutral-800 shadow-lg z-50'
+            : 'w-full bg-gradient-to-r from-primary/5 to-primary/10'
+      }`}
+      dir="ltr"
+    >
+      {/* Media Element */}
       {type === 'video' ? (
         <>
           <video
             ref={mediaRef as React.RefObject<HTMLVideoElement>}
-            className="w-full aspect-video cursor-pointer"
-            onClick={togglePlay}
-            preload="metadata"
+            src={mediaUrl}
+            className="w-full h-full"
             poster={document.image ? pb.files.getUrl(document, document.image) : undefined}
-          >
-            <source src={mediaUrl} type="video/mp4" />
-            عذراً، متصفحك لا يدعم تشغيل الفيديو.
-          </video>
-
-          {/* Video Overlay */}
-          <div 
-            className={`absolute inset-0 bg-gradient-to-t from-black/50 to-transparent transition-opacity duration-300 ${
-              showControls || !isPlaying ? 'opacity-100' : 'opacity-0'
-            }`}
           />
-        </>
-      ) : (
-        <div className="p-6 bg-white dark:bg-neutral-900">
-          <audio
-            ref={mediaRef as React.RefObject<HTMLAudioElement>}
-            preload="metadata"
-          >
-            <source src={mediaUrl} type="audio/mpeg" />
-            عذراً، متصفحك لا يدعم تشغيل الصوت.
-          </audio>
-
-          {/* Audio Visualization Placeholder */}
-          <div className="h-24 mb-4 bg-neutral-100 dark:bg-neutral-800 rounded-lg flex items-center justify-center">
-            <div className="flex items-center gap-1">
-              {[...Array(20)].map((_, i) => (
-                <div
-                  key={i}
-                  className="w-1 bg-primary"
+          {/* Video Controls */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent">
+            <div className="absolute bottom-0 left-0 right-0 p-2 md:p-4 space-y-2">
+              {/* Progress Bar */}
+              <div className="w-full flex items-center gap-2 px-2">
+                <span className="text-xs text-white min-w-[40px]">
+                  {formatTime(currentTime)}
+                </span>
+                
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  step="0.1"
+                  value={progress}
+                  onChange={handleProgressChange}
+                  className="w-full h-1 bg-white/30 rounded-full appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-0 [&::-webkit-slider-thumb]:h-0 [&::-moz-range-thumb]:w-0 [&::-moz-range-thumb]:h-0"
                   style={{
-                    height: `${Math.random() * 100}%`,
-                    opacity: isPlaying ? 1 : 0.5,
-                    transition: 'all 0.2s ease'
+                    background: `linear-gradient(to right, white ${progress}%, rgba(255,255,255,0.3) ${progress}%)`
                   }}
                 />
-              ))}
+
+                <span className="text-xs text-white min-w-[40px]">
+                  {formatTime(duration)}
+                </span>
+              </div>
+
+              {/* Controls */}
+              <div className="flex items-center justify-between px-2">
+                <div className="flex items-center gap-2 md:gap-4">
+                  <button 
+                    className="text-white hover:text-primary transition-colors"
+                    onClick={togglePlay}
+                  >
+                    {isPlaying ? <RiPauseFill size={24} /> : <RiPlayFill size={24} />}
+                  </button>
+
+                  <div className="hidden sm:flex items-center gap-2">
+                    <button 
+                      className="text-white hover:text-primary transition-colors"
+                      onClick={toggleMute}
+                    >
+                      {isMuted ? <RiVolumeMuteFill size={20} /> : <RiVolumeUpFill size={20} />}
+                    </button>
+                    <input
+                      type="range"
+                      min="0"
+                      max="1"
+                      step="0.01"
+                      value={isMuted ? 0 : volume}
+                      onChange={handleVolumeChange}
+                      className="w-16 md:w-20 h-1 bg-white/30 rounded-full appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-moz-range-thumb]:w-3 [&::-moz-range-thumb]:h-3 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-white"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 md:gap-3">
+                  <a 
+                    href={mediaUrl}
+                    download
+                    className="text-white hover:text-primary transition-colors"
+                  >
+                    <RiDownload2Line size={20} />
+                  </a>
+                  <button 
+                    className="text-white hover:text-primary transition-colors"
+                    onClick={toggleFullscreen}
+                  >
+                    {isFullscreen ? <RiFullscreenExitFill size={20} /> : <RiFullscreenFill size={20} />}
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
+        </>
+      ) : (
+        <>
+          <audio
+            ref={mediaRef as React.RefObject<HTMLAudioElement>}
+            src={mediaUrl}
+            className="hidden"
+          />
+          {/* Audio Player Controls */}
+          <div className="w-full h-full flex items-center px-2 md:px-4 gap-2 md:gap-4">
+            {/* Play Button */}
+            <button 
+              className="p-2 text-neutral-900 dark:text-white hover:text-primary transition-colors"
+              onClick={togglePlay}
+            >
+              {isPlaying ? <RiPauseFill size={24} /> : <RiPlayFill size={24} />}
+            </button>
+
+            {/* Title and Progress */}
+            <div className="flex-1 min-w-0 flex flex-col gap-1">
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-neutral-600 dark:text-neutral-400 min-w-[40px]">
+                  {formatTime(currentTime)}
+                </span>
+                
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  step="0.1"
+                  value={progress}
+                  onChange={handleProgressChange}
+                  className="w-full h-1 bg-neutral-200 dark:bg-neutral-700 rounded-full appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-0 [&::-webkit-slider-thumb]:h-0 [&::-moz-range-thumb]:w-0 [&::-moz-range-thumb]:h-0"
+                  style={{
+                    background: `linear-gradient(to right, var(--primary-color) ${progress}%, rgb(229 231 235) ${progress}%)`
+                  }}
+                />
+
+                <span className="text-xs text-neutral-600 dark:text-neutral-400 min-w-[40px]">
+                  {formatTime(duration)}
+                </span>
+              </div>
+
+              <div className="truncate">
+                <span className="text-sm font-medium text-neutral-900 dark:text-white">
+                  {document.title}
+                </span>
+                {document.expand?.author?.name && (
+                  <span className="text-xs text-neutral-600 dark:text-neutral-400 ms-2">
+                    · {document.expand.author.name}
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {/* Volume and Download */}
+            <div className="flex items-center gap-2">
+              <div className="hidden sm:flex items-center gap-2">
+                <button 
+                  className="text-neutral-900 dark:text-white hover:text-primary transition-colors"
+                  onClick={toggleMute}
+                >
+                  {isMuted ? <RiVolumeMuteFill size={20} /> : <RiVolumeUpFill size={20} />}
+                </button>
+                <input
+                  type="range"
+                  min="0"
+                  max="1"
+                  step="0.01"
+                  value={isMuted ? 0 : volume}
+                  onChange={handleVolumeChange}
+                  className="w-16 md:w-20 h-1 bg-neutral-200 dark:bg-neutral-700 rounded-full appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-primary [&::-moz-range-thumb]:w-3 [&::-moz-range-thumb]:h-3 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-primary"
+                />
+              </div>
+              <a 
+                href={mediaUrl}
+                download
+                className="text-neutral-900 dark:text-white hover:text-primary transition-colors"
+              >
+                <RiDownload2Line size={20} />
+              </a>
+            </div>
+          </div>
+        </>
       )}
-
-      {/* Controls */}
-      <div 
-        className={`absolute bottom-0 left-0 right-0 p-4 flex flex-col gap-2 transition-opacity duration-300 ${
-          type === 'video' ? (showControls || !isPlaying ? 'opacity-100' : 'opacity-0') : ''
-        }`}
-      >
-        {/* Progress Bar */}
-        <div 
-          ref={progressRef}
-          className="h-1 bg-neutral-200 dark:bg-neutral-700 rounded-full cursor-pointer group"
-          onClick={handleProgressClick}
-        >
-          <div 
-            className="h-full bg-primary rounded-full relative group-hover:bg-primary-dark transition-all"
-            style={{ width: `${progress}%` }}
-          >
-            <div className="absolute right-0 top-1/2 -translate-y-1/2 w-3 h-3 bg-primary rounded-full scale-0 group-hover:scale-100 transition-transform" />
-          </div>
-        </div>
-
-        <div className="flex items-center gap-4">
-          {/* Play/Pause Button */}
-          <button
-            onClick={togglePlay}
-            className="text-white hover:text-primary transition-colors"
-            aria-label={isPlaying ? 'إيقاف' : 'تشغيل'}
-          >
-            {isPlaying ? <RiPauseFill size={24} /> : <RiPlayFill size={24} />}
-          </button>
-
-          {/* Time Display */}
-          <div className="text-sm text-white">
-            <span>{formatTime(currentTime)}</span>
-            <span className="mx-1">/</span>
-            <span>{formatTime(duration)}</span>
-          </div>
-
-          {/* Volume Control */}
-          <div className="flex items-center gap-2">
-            <button
-              onClick={toggleMute}
-              className="text-white hover:text-primary transition-colors"
-              aria-label={isMuted ? 'تفعيل الصوت' : 'كتم الصوت'}
-            >
-              {isMuted ? <RiVolumeMuteFill size={24} /> : <RiVolumeUpFill size={24} />}
-            </button>
-            <input
-              type="range"
-              min="0"
-              max="1"
-              step="0.1"
-              value={volume}
-              onChange={handleVolumeChange}
-              className="w-20 accent-primary"
-            />
-          </div>
-
-          <div className="flex-grow" />
-
-          {/* Download Button */}
-          <a
-            href={mediaUrl}
-            download
-            className="text-white hover:text-primary transition-colors"
-            aria-label="تحميل"
-          >
-            <RiDownloadFill size={20} />
-          </a>
-
-          {/* Fullscreen Button (Video Only) */}
-          {type === 'video' && (
-            <button
-              onClick={toggleFullscreen}
-              className="text-white hover:text-primary transition-colors"
-              aria-label={isFullscreen ? 'إنهاء ملء الشاشة' : 'ملء الشاشة'}
-            >
-              {isFullscreen ? <RiFullscreenExitFill size={20} /> : <RiFullscreenFill size={20} />}
-            </button>
-          )}
-        </div>
-      </div>
     </div>
   );
 } 

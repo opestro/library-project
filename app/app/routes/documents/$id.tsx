@@ -18,6 +18,8 @@ export default function DocumentDetailPage() {
   const [category, setCategory] = useState<Category | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isAudioPlaying, setIsAudioPlaying] = useState(false);
+  const [audioProgress, setAudioProgress] = useState(0);
 
   useEffect(() => {
     // Create an AbortController to handle request cancellation
@@ -203,14 +205,10 @@ export default function DocumentDetailPage() {
               {/* Video Player */}
               {document.video && (
                 <div className="rounded-2xl overflow-hidden shadow-xl">
-                  <MediaPlayer document={document} type="video" />
-                </div>
-              )}
-              
-              {/* Audio Player */}
-              {document.voice && (
-                <div className="rounded-2xl overflow-hidden shadow-xl">
-                  <MediaPlayer document={document} type="audio" />
+                  <MediaPlayer 
+                    document={document} 
+                    type="video" 
+                  />
                 </div>
               )}
             </div>
@@ -233,6 +231,22 @@ export default function DocumentDetailPage() {
             </div>
           </div>
         </div>
+
+        {/* Fixed Audio Player */}
+        {document.voice && (
+          <div className="fixed bottom-0 left-0 right-0 bg-white dark:bg-neutral-900 border-t border-neutral-200 dark:border-neutral-800 shadow-lg z-50">
+            <div className="container mx-auto px-4">
+              <MediaPlayer 
+                document={document} 
+                type="audio"
+                isFloating={true}
+                onPlay={() => setIsAudioPlaying(true)}
+                onPause={() => setIsAudioPlaying(false)}
+                onTimeUpdate={(time) => setAudioProgress(time)}
+              />
+            </div>
+          </div>
+        )}
       </article>
     </Layout>
   );
