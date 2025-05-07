@@ -1,1 +1,0 @@
-self.__NEXT_FONT_MANIFEST="{\"pages\":{},\"app\":{\"/Users/mohamad/Desktop/projects/library-project/src/app/layout\":[\"static/media/aa4a1f6e4b3986b9-s.p.woff2\",\"static/media/00445b8c47f2e981-s.p.woff2\"]},\"appUsingSizeAdjust\":true,\"pagesUsingSizeAdjust\":false}"
