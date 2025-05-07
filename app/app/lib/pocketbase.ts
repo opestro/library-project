@@ -4,7 +4,7 @@ import PocketBase from 'pocketbase';
  * PocketBase client singleton for database operations
  * This ensures we only create one instance throughout the app
  */
-const pb = new PocketBase('http://localhost:8090');
+const pb = new PocketBase('https://pocketbase-v0g004oc8w880o8ks0k40kwc.cscclub.space');
 
 export default pb;
 
