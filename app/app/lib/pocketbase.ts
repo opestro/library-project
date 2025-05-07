@@ -42,6 +42,14 @@ export interface Document extends BaseModel {
   image?: string;
   voice?: string;
   video?: string;
+  expand?: {
+    age?: Age;
+    category?: Category;
+    author?: {
+      id: string;
+      name: string;
+    };
+  };
 }
 
 export interface User extends BaseModel {
