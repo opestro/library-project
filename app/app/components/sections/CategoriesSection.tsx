@@ -11,17 +11,20 @@ import type { Category } from "../../lib/pocketbase";
  * @param limit - Optional limit of items to display
  * @param showViewAll - Whether to show the "View All" link
  * @param title - Optional custom title for the section
+ * @param cancelKey - Optional unique identifier for cancellation
  */
 interface CategoriesSectionProps {
   limit?: number;
   showViewAll?: boolean;
   title?: string;
+  cancelKey?: string;
 }
 
 export default function CategoriesSection({ 
   limit = 6, 
   showViewAll = true,
-  title = "التصنيفات"
+  title = "التصنيفات",
+  cancelKey = "categories-section"
 }: CategoriesSectionProps) {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
@@ -29,44 +32,92 @@ export default function CategoriesSection({
   const [categoryDocCounts, setCategoryDocCounts] = useState<Record<string, number>>({});
 
   useEffect(() => {
+    // Create an AbortController to handle request cancellation
+    const abortController = new AbortController();
+    
+    // Create a unique cancelKey for this specific section instance
+    const uniqueCancelKey = `${cancelKey}-${limit}`;
+
     // Fetch categories from PocketBase
     const fetchCategories = async () => {
       try {
         setLoading(true);
         const response = await pb.collection('categories').getList(1, limit, {
           sort: 'name',
+          $cancelKey: uniqueCancelKey,
         });
         
-        // Cast to unknown first to avoid TypeScript error
-        setCategories(response.items as unknown as Category[]);
-        
-        // Fetch document counts for each category
-        const categoryIds = response.items.map(item => item.id);
-        const countPromises = categoryIds.map(async (categoryId) => {
-          const docsCount = await pb.collection('documents').getList(1, 1, {
-            filter: `category = "${categoryId}"`,
+        // Only update state if the component is still mounted
+        if (!abortController.signal.aborted) {
+          // Cast to unknown first to avoid TypeScript error
+          const categoriesList = response.items as unknown as Category[];
+          setCategories(categoriesList);
+          
+          // Fetch document counts for each category
+          const categoryIds = categoriesList.map(item => item.id);
+          const countPromises = categoryIds.map(async (categoryId) => {
+            const countCancelKey = `${uniqueCancelKey}-count-${categoryId}`;
+            try {
+              const docsCount = await pb.collection('documents').getList(1, 1, {
+                filter: `category = "${categoryId}"`,
+                $cancelKey: countCancelKey,
+              });
+              return { id: categoryId, count: docsCount.totalItems };
+            } catch (err) {
+              // Skip this count if it was cancelled
+              if (err instanceof Error && err.message.includes('autocancelled')) {
+                return { id: categoryId, count: 0 };
+              }
+              throw err;
+            }
           });
-          return { id: categoryId, count: docsCount.totalItems };
-        });
-        
-        const countResults = await Promise.all(countPromises);
-        const countsMap: Record<string, number> = {};
-        countResults.forEach(result => {
-          countsMap[result.id] = result.count;
-        });
-        
-        setCategoryDocCounts(countsMap);
-        setError(null);
+          
+          try {
+            const countResults = await Promise.all(countPromises);
+            
+            // Only update state if the component is still mounted
+            if (!abortController.signal.aborted) {
+              const countsMap: Record<string, number> = {};
+              countResults.forEach(result => {
+                countsMap[result.id] = result.count;
+              });
+              
+              setCategoryDocCounts(countsMap);
+              setError(null);
+            }
+          } catch (err) {
+            console.error('Error fetching category counts:', err);
+            if (!abortController.signal.aborted && err instanceof Error && !err.message.includes('autocancelled')) {
+              setError('حدث خطأ أثناء تحميل عدد الوثائق');
+            }
+          }
+        }
       } catch (err) {
         console.error('Error fetching categories:', err);
-        setError('حدث خطأ أثناء تحميل التصنيفات');
+        
+        // Only update error state if it's not a cancellation error and component is mounted
+        if (!abortController.signal.aborted && err instanceof Error && !err.message.includes('autocancelled')) {
+          setError('حدث خطأ أثناء تحميل التصنيفات');
+        }
       } finally {
-        setLoading(false);
+        // Only update loading state if the component is still mounted
+        if (!abortController.signal.aborted) {
+          setLoading(false);
+        }
       }
     };
 
     fetchCategories();
-  }, [limit]);
+    
+    // Cleanup function to abort any pending requests when component unmounts
+    return () => {
+      abortController.abort();
+      // Also cancel any pending PocketBase requests with the same cancelKey
+      pb.cancelRequest(uniqueCancelKey);
+      // We don't need to cancel individual count requests here,
+      // as they will be cancelled when the main request is cancelled
+    };
+  }, [limit, cancelKey]);
 
   return (
     <section className="py-16 bg-neutral-50 dark:bg-neutral-900">

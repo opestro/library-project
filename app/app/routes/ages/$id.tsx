@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams, Link } from "react-router";
+import { useParams, Link, useNavigate } from "react-router";
 import Layout from "../../components/layout/Layout";
 import DocumentsSection from "../../components/sections/DocumentsSection";
 import pb from "../../lib/pocketbase";
@@ -11,29 +11,65 @@ import type { Age } from "../../lib/pocketbase";
  */
 export default function AgeDetailPage() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [age, setAge] = useState<Age | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    // Create an AbortController to handle request cancellation
+    const abortController = new AbortController();
+
     const fetchAge = async () => {
       try {
         setLoading(true);
-        const record = await pb.collection('ages').getOne(id!);
-        setAge(record as unknown as Age);
         setError(null);
+
+        if (!id) {
+          throw new Error("معرف العصر غير موجود");
+        }
+
+        // Pass the signal to PocketBase to handle cancellation properly
+        const record = await pb.collection('ages').getOne(id, {
+          $cancelKey: `age-${id}`,
+        });
+        
+        // Only update state if the component is still mounted
+        if (!abortController.signal.aborted) {
+          setAge(record as unknown as Age);
+        }
       } catch (err) {
         console.error('Error fetching age:', err);
-        setError('حدث خطأ أثناء تحميل بيانات العصر التاريخي');
+        
+        // Only update error state if it's not a cancellation error and component is mounted
+        if (!abortController.signal.aborted) {
+          if (err instanceof Error) {
+            if (err.message.includes('404')) {
+              setError('لم يتم العثور على العصر المطلوب');
+              // Redirect to ages list after 3 seconds
+              setTimeout(() => navigate('/ages'), 3000);
+            } else if (!err.message.includes('autocancelled')) {
+              setError('حدث خطأ أثناء تحميل بيانات العصر التاريخي');
+            }
+          }
+        }
       } finally {
-        setLoading(false);
+        // Only update loading state if the component is still mounted
+        if (!abortController.signal.aborted) {
+          setLoading(false);
+        }
       }
     };
 
-    if (id) {
-      fetchAge();
-    }
-  }, [id]);
+    fetchAge();
+
+    // Cleanup function to abort any pending requests when component unmounts
+    return () => {
+      abortController.abort();
+      // Also cancel any pending PocketBase requests with the same cancelKey
+      pb.cancelRequest(`age-${id}`);
+    };
+  }, [id, navigate]);
 
   // Format the year range if available
   const yearRange = age && (
@@ -73,6 +109,9 @@ export default function AgeDetailPage() {
             <h1 className="text-2xl font-bold text-neutral-900 dark:text-white mb-4">
               {error || 'لم يتم العثور على العصر التاريخي'}
             </h1>
+            <p className="text-neutral-600 dark:text-neutral-400 mb-4">
+              سيتم إعادة توجيهك إلى قائمة العصور...
+            </p>
             <Link 
               to="/ages"
               className="text-primary hover:text-primary-dark transition-colors"

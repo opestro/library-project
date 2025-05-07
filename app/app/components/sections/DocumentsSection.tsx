@@ -12,6 +12,9 @@ import type { Document } from "../../lib/pocketbase";
  * @param showViewAll - Whether to show the "View All" link
  * @param title - Optional custom title for the section
  * @param filter - Optional PocketBase filter string
+ * @param categoryId - Optional category ID to filter by
+ * @param ageId - Optional age ID to filter by
+ * @param cancelKey - Optional unique identifier for cancellation
  */
 interface DocumentsSectionProps {
   limit?: number;
@@ -20,6 +23,7 @@ interface DocumentsSectionProps {
   filter?: string;
   categoryId?: string;
   ageId?: string;
+  cancelKey?: string;
 }
 
 export default function DocumentsSection({ 
@@ -28,13 +32,20 @@ export default function DocumentsSection({
   title = "أحدث الوثائق",
   filter,
   categoryId,
-  ageId
+  ageId,
+  cancelKey = "documents-section"
 }: DocumentsSectionProps) {
   const [documents, setDocuments] = useState<Document[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    // Create an AbortController to handle request cancellation
+    const abortController = new AbortController();
+    
+    // Create a unique cancelKey for this specific section instance
+    const uniqueCancelKey = `${cancelKey}-${categoryId || ''}-${ageId || ''}-${limit}`;
+
     // Fetch documents from PocketBase
     const fetchDocuments = async () => {
       try {
@@ -59,22 +70,40 @@ export default function DocumentsSection({
         const response = await pb.collection('documents').getList(1, limit, {
           sort: '-published_at',
           filter: filterString,
-          expand: 'author,category,age'
+          expand: 'author,category,age',
+          $cancelKey: uniqueCancelKey,
         });
         
-        // Cast to unknown first to avoid TypeScript error
-        setDocuments(response.items as unknown as Document[]);
-        setError(null);
+        // Only update state if the component is still mounted
+        if (!abortController.signal.aborted) {
+          // Cast to unknown first to avoid TypeScript error
+          setDocuments(response.items as unknown as Document[]);
+          setError(null);
+        }
       } catch (err) {
         console.error('Error fetching documents:', err);
-        setError('حدث خطأ أثناء تحميل الوثائق');
+        
+        // Only update error state if it's not a cancellation error and component is mounted
+        if (!abortController.signal.aborted && err instanceof Error && !err.message.includes('autocancelled')) {
+          setError('حدث خطأ أثناء تحميل الوثائق');
+        }
       } finally {
-        setLoading(false);
+        // Only update loading state if the component is still mounted
+        if (!abortController.signal.aborted) {
+          setLoading(false);
+        }
       }
     };
 
     fetchDocuments();
-  }, [limit, filter, categoryId, ageId]);
+    
+    // Cleanup function to abort any pending requests when component unmounts
+    return () => {
+      abortController.abort();
+      // Also cancel any pending PocketBase requests with the same cancelKey
+      pb.cancelRequest(uniqueCancelKey);
+    };
+  }, [limit, filter, categoryId, ageId, cancelKey]);
   
   // Determine the "View All" link URL based on context
   const getViewAllUrl = () => {

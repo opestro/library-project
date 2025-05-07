@@ -11,43 +11,71 @@ import type { Age } from "../../lib/pocketbase";
  * @param limit - Optional limit of items to display
  * @param showViewAll - Whether to show the "View All" link
  * @param title - Optional custom title for the section
+ * @param cancelKey - Optional unique identifier for cancellation
  */
 interface AgesSectionProps {
   limit?: number;
   showViewAll?: boolean;
   title?: string;
+  cancelKey?: string;
 }
 
 export default function AgesSection({ 
   limit = 4, 
   showViewAll = true,
-  title = "العصور التاريخية"
+  title = "العصور التاريخية",
+  cancelKey = "ages-section"
 }: AgesSectionProps) {
   const [ages, setAges] = useState<Age[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    // Create an AbortController to handle request cancellation
+    const abortController = new AbortController();
+    
+    // Create a unique cancelKey for this specific section instance
+    const uniqueCancelKey = `${cancelKey}-${limit}`;
+
     // Fetch ages from PocketBase
     const fetchAges = async () => {
       try {
         setLoading(true);
         const response = await pb.collection('ages').getList(1, limit, {
           sort: '-created',
+          $cancelKey: uniqueCancelKey,
         });
-        // Cast to unknown first to avoid TypeScript error
-        setAges(response.items as unknown as Age[]);
-        setError(null);
+        
+        // Only update state if the component is still mounted
+        if (!abortController.signal.aborted) {
+          // Cast to unknown first to avoid TypeScript error
+          setAges(response.items as unknown as Age[]);
+          setError(null);
+        }
       } catch (err) {
         console.error('Error fetching ages:', err);
-        setError('حدث خطأ أثناء تحميل العصور التاريخية');
+        
+        // Only update error state if it's not a cancellation error and component is mounted
+        if (!abortController.signal.aborted && err instanceof Error && !err.message.includes('autocancelled')) {
+          setError('حدث خطأ أثناء تحميل العصور التاريخية');
+        }
       } finally {
-        setLoading(false);
+        // Only update loading state if the component is still mounted
+        if (!abortController.signal.aborted) {
+          setLoading(false);
+        }
       }
     };
 
     fetchAges();
-  }, [limit]);
+    
+    // Cleanup function to abort any pending requests when component unmounts
+    return () => {
+      abortController.abort();
+      // Also cancel any pending PocketBase requests with the same cancelKey
+      pb.cancelRequest(uniqueCancelKey);
+    };
+  }, [limit, cancelKey]);
 
   return (
     <section className="py-16">

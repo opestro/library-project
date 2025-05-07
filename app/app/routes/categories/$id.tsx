@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams, Link } from "react-router";
+import { useParams, Link, useNavigate } from "react-router";
 import Layout from "../../components/layout/Layout";
 import DocumentsSection from "../../components/sections/DocumentsSection";
 import pb from "../../lib/pocketbase";
@@ -11,37 +11,77 @@ import type { Category } from "../../lib/pocketbase";
  */
 export default function CategoryDetailPage() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [category, setCategory] = useState<Category | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [documentCount, setDocumentCount] = useState<number>(0);
 
   useEffect(() => {
+    // Create an AbortController to handle request cancellation
+    const abortController = new AbortController();
+
     const fetchCategory = async () => {
       try {
         setLoading(true);
-        const record = await pb.collection('categories').getOne(id!);
-        setCategory(record as unknown as Category);
-        
-        // Get document count for this category
-        const docsCount = await pb.collection('documents').getList(1, 1, {
-          filter: `category = "${id}"`,
-        });
-        setDocumentCount(docsCount.totalItems);
-        
         setError(null);
+
+        if (!id) {
+          throw new Error("معرف التصنيف غير موجود");
+        }
+
+        // Pass the cancelKey to PocketBase to handle cancellation properly
+        const record = await pb.collection('categories').getOne(id, {
+          $cancelKey: `category-${id}`,
+        });
+        
+        // Only update state if the component is still mounted
+        if (!abortController.signal.aborted) {
+          setCategory(record as unknown as Category);
+          
+          // Get document count for this category
+          const docsCount = await pb.collection('documents').getList(1, 1, {
+            filter: `category = "${id}"`,
+            $cancelKey: `category-docs-${id}`,
+          });
+          
+          if (!abortController.signal.aborted) {
+            setDocumentCount(docsCount.totalItems);
+          }
+        }
       } catch (err) {
         console.error('Error fetching category:', err);
-        setError('حدث خطأ أثناء تحميل بيانات التصنيف');
+        
+        // Only update error state if it's not a cancellation error and component is mounted
+        if (!abortController.signal.aborted) {
+          if (err instanceof Error) {
+            if (err.message.includes('404')) {
+              setError('لم يتم العثور على التصنيف المطلوب');
+              // Redirect to categories list after 3 seconds
+              setTimeout(() => navigate('/categories'), 3000);
+            } else if (!err.message.includes('autocancelled')) {
+              setError('حدث خطأ أثناء تحميل بيانات التصنيف');
+            }
+          }
+        }
       } finally {
-        setLoading(false);
+        // Only update loading state if the component is still mounted
+        if (!abortController.signal.aborted) {
+          setLoading(false);
+        }
       }
     };
 
-    if (id) {
-      fetchCategory();
-    }
-  }, [id]);
+    fetchCategory();
+
+    // Cleanup function to abort any pending requests when component unmounts
+    return () => {
+      abortController.abort();
+      // Also cancel any pending PocketBase requests with the same cancelKey
+      pb.cancelRequest(`category-${id}`);
+      pb.cancelRequest(`category-docs-${id}`);
+    };
+  }, [id, navigate]);
 
   if (loading) {
     return (
@@ -64,6 +104,9 @@ export default function CategoryDetailPage() {
             <h1 className="text-2xl font-bold text-neutral-900 dark:text-white mb-4">
               {error || 'لم يتم العثور على التصنيف'}
             </h1>
+            <p className="text-neutral-600 dark:text-neutral-400 mb-4">
+              سيتم إعادة توجيهك إلى قائمة التصنيفات...
+            </p>
             <Link 
               to="/categories"
               className="text-primary hover:text-primary-dark transition-colors"

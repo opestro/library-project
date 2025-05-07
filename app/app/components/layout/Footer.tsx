@@ -79,7 +79,7 @@ export default function Footer() {
             © {currentYear} المكتبة التاريخية. جميع الحقوق محفوظة.
           </p>
           <p className="text-neutral-600 dark:text-neutral-400 text-sm mt-4 md:mt-0 flex items-center">
-            صُنع بـ <RiHeartFill className="text-red-500 mx-1" /> في المملكة العربية السعودية
+            صُنع بـ <RiHeartFill className="text-red-500 mx-1" /> في الجزائر  
           </p>
         </div>
       </div>
